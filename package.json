@@ -13,6 +13,7 @@
     "url": "git+https://github.com/Emadello/cordova-plugin-CDVNavBar.git"
   },
   "keywords": [
+	"ecosystem:cordova",
     "cordova",
     "navigationbar",
     "cordova-ios"
