@@ -1,5 +1,5 @@
 {
-  "name": "cordova-plugin-CDVNavBar",
+  "name": "cordova-plugin-cdvnavbar",
   "version": "1.0.0",
   "description": "Add NavigationBar to your Cordova Applications",
   "cordova": {
