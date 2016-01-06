@@ -20,7 +20,7 @@
     <platform name="ios">
         <config-file target="config.xml" parent="/*">
             <feature name="NavBar">
-                <param name="ios-package" value="NavBar"/>
+                <param name="ios-package" value="NavigationBar"/>
             </feature>
         </config-file>
 
