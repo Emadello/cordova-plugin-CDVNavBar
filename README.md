@@ -18,6 +18,7 @@ You should also install CDVTabBar plugin to work properly.
 
 ### Example
 
+```javascript
 navbar.create();
 navbar.hideLeftButton()
 navbar.hideRightButton();
@@ -25,3 +26,4 @@ navbar.setupRightButton("", 'barButton:Refresh', null);
 navbar.showRightButton();
 navbar.settitle("Tab 1");
 navbar.show();
+```
