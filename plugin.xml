@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<plugin xmlns="http://apache.org/cordova/ns/plugins/1.0"
+    xmlns:rim="http://www.blackberry.com/ns/widgets"
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    id="cordova-plugin-CDVNavBar"
+    version="1.0.0">
+    <name>CDVTabBar</name>
+    <description>Cordova NavigationBar Plugin</description>
+    <license>MIT</license>
+    <keywords>cordova,tabbar,ios</keywords>
+    <repo>https://github.com/Emadello/cordova-plugin-CDVNavBar.git</repo>
+    <issue>https://github.com/Emadello/cordova-plugin-CDVNavBar/issues</issue>
+
+    <js-module src="www/NavBar.js" name="NavBar">
+        <clobbers target="navbar" />
+    </js-module>
+
+    <!-- ios -->
+    <platform name="ios">
+        <config-file target="config.xml" parent="/*">
+            <feature name="NavBar">
+                <param name="ios-package" value="NavBar"/>
+            </feature>
+        </config-file>
+
+        <header-file src="src/ios/NavigationBar.h" />
+        <source-file src="src/ios/NavigationBar.m" />
+        <header-file src="src/ios/CDVNavigationBarController.h" />
+        <source-file src="src/ios/CDVNavigationBarController.m" />
+        <source-file src="src/ios/CDVNavigationBarController.xib" />
+    </platform>
+</plugin>

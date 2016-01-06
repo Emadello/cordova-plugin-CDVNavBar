@@ -1,0 +1,22 @@
+{
+  "name": "cordova-plugin-CDVNavBar",
+  "version": "1.0.0",
+  "description": "Add NavigationBar to your Cordova Applications",
+  "cordova": {
+    "id": "cordova-plugin-CDVNavBar",
+    "platforms": [
+      "ios"
+    ]
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Emadello/cordova-plugin-CDVNavBar.git"
+  },
+  "keywords": [
+    "cordova",
+    "navigationbar",
+    "cordova-ios"
+  ],
+  "author": "Lifetime.com.eg",
+  "license": "MIT"
+}
