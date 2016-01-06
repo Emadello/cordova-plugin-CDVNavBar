@@ -1,4 +1,4 @@
-cordova.define("com.Lifetime.nativecontrols.NavBar", function(require, exports, module) { /*
+cordova.define("cordova-plugin-CDVTabBar.NavBar", function(require, exports, module) { /*
 *
 * Licensed to the Apache Software Foundation (ASF) under one
 * or more contributor license agreements.  See the NOTICE file
@@ -38,63 +38,63 @@ module.exports = {
         exec(null, null, "NavBar", "create", [style, options]);
 
     },
-               
+
     show: function(style, options) {
         options = options || {};
         if(!("style" in options))
         options.style = style || "Default";
         exec(null, null, "NavBar", "show", [style, options]);
     },
-               
-               
-               
+
+
+
     hide: function() {
     exec(null, null, "NavBar", "hide", []);
     },
-               
+
     settitle: function(title) {
         exec(null, null, "NavBar", "setTitle", [title]);
     },
-               
+
     hideLeftButton: function(style, options) {
         exec(null, null, "NavBar", "hideLeftButton", [style, options]);
     },
-               
+
     hideRightButton: function(style, options) {
         exec(null, null, "NavBar", "hideRightButton", [style, options]);
     },
-               
+
     showLeftButton: function(style, options) {
         exec(null, null, "NavBar", "showLeftButton", [style, options]);
     },
-               
+
     showRightButton: function(style, options) {
         exec(null, null, "NavBar", "showRightButton", [style, options]);
     },
-               
+
     setupLeftButton: function(title, image, thefunction) {
         this.leftButtonCallback = thefunction;
         exec(null, null, "NavBar", "setupLeftButton", [title, image, thefunction]);
     },
-               
+
     leftButtonTapped: function() {
         if(typeof(this.leftButtonCallback) === "function")
         this.leftButtonCallback()
     },
-               
+
     setupRightButton: function(title, image, thefunction) {
         this.rightButtonCallback = thefunction;
         exec(null, null, "NavBar", "setupRightButton", [title, image, thefunction]);
     },
-               
+
         rightButtonTapped: function() {
         if(typeof(this.rightButtonCallback) === "function")
         this.rightButtonCallback()
     }
-               
-               
-               
+
+
+
 }
 
-               
+
 });
