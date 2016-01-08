@@ -4,8 +4,8 @@
     xmlns:rim="http://www.blackberry.com/ns/widgets"
     xmlns:android="http://schemas.android.com/apk/res/android"
     id="cordova-plugin-CDVNavBar"
-    version="1.0.0">
-    <name>CDVTabBar</name>
+    version="1.0.1">
+    <name>CDVNavBar</name>
     <description>Cordova NavigationBar Plugin</description>
     <license>MIT</license>
     <keywords>cordova,tabbar,ios</keywords>
