@@ -1,9 +1,9 @@
 //
 //  CDVNavigationBarController.h
-//  HelloPhoneGap1
+//  Cordova Plugin
 //
-//  Created by Hiedi Utley on 8/18/11.
-//  Copyright (c) 2011 __MyCompanyName__. All rights reserved.
+//  Created by Lifetime.com.eg Technical Team (Amr Hossam / Emad ElShafie) on 6 January 2016.
+//  Copyright (c) 2016 Lifetime.com.eg. All rights reserved.
 //
 
 #import <UIKit/UIKit.h>

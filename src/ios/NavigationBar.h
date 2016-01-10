@@ -1,3 +1,11 @@
+//
+//  NavigationBar.h
+//  Cordova Plugin
+//
+//  Created by Lifetime.com.eg Technical Team (Amr Hossam / Emad ElShafie) on 6 January 2016.
+//  Copyright (c) 2016 Lifetime.com.eg. All rights reserved.
+//
+
 #import <Foundation/Foundation.h>
 #import <UIKit/UIKit.h>
 #import <UIKit/UINavigationBar.h>

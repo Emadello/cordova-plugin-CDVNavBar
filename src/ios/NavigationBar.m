@@ -1,12 +1,10 @@
-/*
- NavigationBar.m
-
- Work based on the NativeControls plugin (Jesse MacFadyen, MIT licensed) and additions made by Hiedi Utley
- (https://github.com/hutley/HelloPhoneGap1.0/) and zSprawl (https://github.com/zSprawl/NativeControls/).
-
- Navigation bar API cleaned, improved and moved in a separate plugin by Amr Hossam and Emad Hossam
- (Lifetimedev, https://github.com/AndiDog/phonegap-ios-navigationbar-plugin).
- */
+//
+//  NavigationBar.h
+//  Cordova Plugin
+//
+//  Created by Lifetime.com.eg Technical Team (Amr Hossam / Emad ElShafie) on 6 January 2016.
+//  Copyright (c) 2016 Lifetime.com.eg. All rights reserved.
+//
 
 #import "NavigationBar.h"
 #import <UIKit/UITabBar.h>

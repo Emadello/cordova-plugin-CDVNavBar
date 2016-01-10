@@ -1,7 +1,7 @@
 {
   "name": "cordova-plugin-cdvnavbar",
-  "version": "1.0.1",
-  "description": "Add NavigationBar to your Cordova Applications",
+  "version": "1.0.2",
+  "description": "Add Native NavigationBar to your Cordova Applications",
   "cordova": {
     "id": "cordova-plugin-CDVNavBar",
     "platforms": [
@@ -16,7 +16,8 @@
 	"ecosystem:cordova",
     "cordova",
     "navigationbar",
-    "cordova-ios"
+    "cordova-ios",
+    "native"
   ],
   "author": "Lifetime.com.eg",
   "license": "MIT",
