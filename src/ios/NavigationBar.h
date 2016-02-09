@@ -6,26 +6,22 @@
 //  Copyright (c) 2016 Lifetime.com.eg. All rights reserved.
 //
 
-#import <Foundation/Foundation.h>
-#import <UIKit/UIKit.h>
-#import <UIKit/UINavigationBar.h>
-
-// For older versions of Cordova, you may have to use: #import "CDVPlugin.h"
-#import <Cordova/CDVPlugin.h>
+#import <WebKit/WebKit.h>
+#import "Cordova/CDV.h"
 
 #import "CDVNavigationBarController.h"
 
 @interface NavigationBar : CDVPlugin <CDVNavigationBarDelegate> {
     UINavigationBar * navBar;
-
+    
     // Represents frame of web view as if started in portrait mode. Coordinates are relative to the superview. With
     // Cordova 2.1.0, frame.origin.y=0 means directly under the status bar, while in older versions it would have been
     // frame.origin.y=20.
     CGRect  originalWebViewFrame;
-
+    
     CGFloat navBarHeight;
     CGFloat tabBarHeight;
-
+    
     CDVNavigationBarController * navBarController;
 }
 

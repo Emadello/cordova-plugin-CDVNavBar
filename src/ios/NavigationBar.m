@@ -11,7 +11,7 @@
 #import <QuartzCore/QuartzCore.h>
 
 // For older versions of Cordova, you may have to use: #import "CDVDebug.h"
-#import <Cordova/CDVDebug.h>
+//#import <Cordova/CDVDebug.h>
 
 @implementation NavigationBar
 #ifndef __IPHONE_3_0
@@ -19,53 +19,51 @@
 #endif
 @synthesize navBarController;
 
--(CDVPlugin*) initWithWebView:(UIWebView*)theWebView
-{
-    
-    self = (NavigationBar*)[super initWithWebView:theWebView];
-    if(self)
-    {
-        // -----------------------------------------------------------------------
-        // This code block is the same for both the navigation and tab bar plugin!
-        // -----------------------------------------------------------------------
-
-        // The original web view frame must be retrieved here. On iPhone, it would be 0,0,320,460 for example. Since
-        // Cordova seems to initialize plugins on the first call, there is a plugin method init() that has to be called
-        // in order to make Cordova call *this* method. If someone forgets the init() call and uses the navigation bar
-        // and tab bar plugins together, these values won't be the original web view frame and layout will be wrong.
-        originalWebViewFrame = theWebView.frame;
-        UIApplication *app = [UIApplication sharedApplication];
-
-        UIInterfaceOrientation orientation = [[UIApplication sharedApplication] statusBarOrientation];
-        switch (orientation)
-        {
-            case UIInterfaceOrientationPortrait:
-            case UIInterfaceOrientationPortraitUpsideDown:
-                break;
-            case UIInterfaceOrientationLandscapeLeft:
-            case UIInterfaceOrientationLandscapeRight:
-            {
-                float statusBarHeight = 0;
-                if(!app.statusBarHidden)
-                    statusBarHeight = MIN(app.statusBarFrame.size.width, app.statusBarFrame.size.height);
-
-                originalWebViewFrame = CGRectMake(originalWebViewFrame.origin.y,
-                                                  originalWebViewFrame.origin.x,
-                                                  originalWebViewFrame.size.height + statusBarHeight,
-                                                  originalWebViewFrame.size.width - statusBarHeight);
-                break;
-            }
-            default:
-                NSLog(@"Unknown orientation: %d", orientation);
-                break;
-        }
-
-        //if (isAtLeast8) navBarHeight = 44.0f;
-        navBarHeight = 64.0f;
-        tabBarHeight = 49.0f;
-        // -----------------------------------------------------------------------
+- (void) pluginInitialize {
+    UIWebView *uiwebview = nil;
+    if ([self.webView isKindOfClass:[UIWebView class]]) {
+        uiwebview = ((UIWebView*)self.webView);
     }
-    return self;
+    // -----------------------------------------------------------------------
+    // This code block is the same for both the navigation and tab bar plugin!
+    // -----------------------------------------------------------------------
+    
+    // The original web view frame must be retrieved here. On iPhone, it would be 0,0,320,460 for example. Since
+    // Cordova seems to initialize plugins on the first call, there is a plugin method init() that has to be called
+    // in order to make Cordova call *this* method. If someone forgets the init() call and uses the navigation bar
+    // and tab bar plugins together, these values won't be the original web view frame and layout will be wrong.
+    originalWebViewFrame = uiwebview.frame;
+    UIApplication *app = [UIApplication sharedApplication];
+    
+    UIInterfaceOrientation orientation = [[UIApplication sharedApplication] statusBarOrientation];
+    switch (orientation)
+    {
+        case UIInterfaceOrientationPortrait:
+        case UIInterfaceOrientationPortraitUpsideDown:
+            break;
+        case UIInterfaceOrientationLandscapeLeft:
+        case UIInterfaceOrientationLandscapeRight:
+        {
+            float statusBarHeight = 0;
+            if(!app.statusBarHidden)
+                statusBarHeight = MIN(app.statusBarFrame.size.width, app.statusBarFrame.size.height);
+            
+            originalWebViewFrame = CGRectMake(originalWebViewFrame.origin.y,
+                                              originalWebViewFrame.origin.x,
+                                              originalWebViewFrame.size.height + statusBarHeight,
+                                              originalWebViewFrame.size.width - statusBarHeight);
+            break;
+        }
+        default:
+            NSLog(@"Unknown orientation: %d", orientation);
+            break;
+    }
+    
+    //if (isAtLeast8) navBarHeight = 44.0f;
+    navBarHeight = 64.0f;
+    tabBarHeight = 49.0f;
+    // -----------------------------------------------------------------------
+    
 }
 
 
@@ -74,38 +72,38 @@
 {
     UIButton *backButton = [[UIButton alloc] init];
     UIImage *imgNormal = [UIImage imageNamed:imageName];
-
+    
     // UIImage's resizableImageWithCapInsets method is only available from iOS 5.0. With earlier versions, the
     // stretchableImageWithLeftCapWidth is used which behaves a bit differently.
     if([imgNormal respondsToSelector:@selector(resizableImageWithCapInsets)])
         imgNormal = [imgNormal resizableImageWithCapInsets:UIEdgeInsetsMake(0, fixedMarginLeft, 0, fixedMarginRight)];
     else
         imgNormal = [imgNormal stretchableImageWithLeftCapWidth:MAX(fixedMarginLeft, fixedMarginRight) topCapHeight:0];
-
+    
     [backButton setBackgroundImage:imgNormal forState:UIControlStateNormal];
-
+    
     backButton.titleLabel.textColor = [UIColor whiteColor];
     backButton.titleLabel.font = [UIFont boldSystemFontOfSize:12.0f];
     backButton.titleLabel.textAlignment = UITextAlignmentCenter;
-
+    
     CGSize textSize = [title sizeWithFont:backButton.titleLabel.font];
-
+    
     float buttonWidth = MAX(imgNormal.size.width, textSize.width + fixedMarginLeft + fixedMarginRight);//imgNormal.size.width > (textSize.width + fixedMarginLeft + fixedMarginRight)
-                        //? imgNormal.size.width : (textSize.width + fixedMarginLeft + fixedMarginRight);
+    //? imgNormal.size.width : (textSize.width + fixedMarginLeft + fixedMarginRight);
     backButton.frame = CGRectMake(0, 0, buttonWidth, imgNormal.size.height);
-
+    
     CGFloat marginTopBottom = (backButton.frame.size.height - textSize.height) / 2;
     [backButton setTitleEdgeInsets:UIEdgeInsetsMake(marginTopBottom, fixedMarginLeft, marginTopBottom, fixedMarginRight)];
-
+    
     [backButton setTitle:title forState:UIControlStateNormal];
     [backButton setTitleColor:[UIColor whiteColor] forState:UIControlStateNormal];
     [backButton.titleLabel setFont:[UIFont boldSystemFontOfSize:12.0f]];
-
+    
     UIBarButtonItem *backButtonItem = [[UIBarButtonItem alloc] initWithCustomView:backButton];
     [backButton addTarget:target action:action forControlEvents:UIControlEventTouchUpInside];
-
+    
     // imgNormal is autoreleased
-
+    
     return backButtonItem;
 }
 
@@ -113,41 +111,41 @@
 {
     if(!navBar)
         return;
-
+    
     const bool navBarShown = !navBar.hidden;
     bool tabBarShown = false;
     bool tabBarAtBottom = true;
-
+    
     UIView *parent = [navBar superview];
     for(UIView *view in parent.subviews)
         if([view isMemberOfClass:[UITabBar class]])
         {
             tabBarShown = !view.hidden;
-
+            
             // Tab bar height is customizable
             if(tabBarShown)
             {
                 tabBarHeight = view.bounds.size.height;
-
+                
                 // Since the navigation bar plugin plays together with the tab bar plugin, and the tab bar can as well
                 // be positioned at the top, here's some magic to find out where it's positioned:
                 tabBarAtBottom = true;
                 if([view respondsToSelector:@selector(tabBarAtBottom)])
                     tabBarAtBottom = [view performSelector:@selector(tabBarAtBottom)];
             }
-
+            
             break;
         }
-
+    
     // -----------------------------------------------------------------------------
     // IMPORTANT: Below code is the same in both the navigation and tab bar plugins!
     // -----------------------------------------------------------------------------
-
+    
     CGFloat left = originalWebViewFrame.origin.x;
     CGFloat right = left + originalWebViewFrame.size.width;
     CGFloat top = originalWebViewFrame.origin.y;
     CGFloat bottom = top + originalWebViewFrame.size.height;
-
+    
     if(navBar.hidden == NO) {
         
         top += navBarHeight;
@@ -156,7 +154,7 @@
         top = 0;
         NSLog(@"NAVBAR IS HIDDEN");
     }
-
+    
     if(tabBarShown)
     {
         if(tabBarAtBottom)
@@ -164,15 +162,15 @@
         else
             top += tabBarHeight;
     }
-
+    
     CGRect webViewFrame = CGRectMake(left, top, right - left, bottom - top);
-
+    
     [self.webView setFrame:webViewFrame];
-
+    
     // -----------------------------------------------------------------------------
-
+    
     // NOTE: Following part again for navigation bar plugin only
-
+    
     if(navBar.hidden == NO)
     {
         if(tabBarAtBottom)
@@ -192,10 +190,10 @@
     NSLog(@"HRERE");
     if(navBar)
         return;
-
+    
     navBarController = [[CDVNavigationBarController alloc] init];
     navBar = (UINavigationBar*)[navBarController view];
-
+    
     navBar.barStyle = UIBarStyleBlackTranslucent;
     [navBar setTintColor:[UIColor whiteColor]];
     [navBar setBackgroundColor:[UIColor colorWithRed:218.0/255.0 green:33.0/255.0 blue:39.0/255.0 alpha:1.0]];
@@ -217,7 +215,7 @@
     [navBar setHidden:YES];
     
     [UIApplication sharedApplication].statusBarStyle = UIStatusBarStyleLightContent;
-
+    
 }
 
 
@@ -290,8 +288,13 @@
 
 -(void) leftButtonTapped
 {
+    UIWebView *uiwebview = nil;
+    if ([self.webView isKindOfClass:[UIWebView class]]) {
+        uiwebview = ((UIWebView*)self.webView);
+    }
+    
     NSString * jsCallBack = @"navbar.leftButtonTapped();";
-    [self.webView stringByEvaluatingJavaScriptFromString:jsCallBack];
+    [uiwebview stringByEvaluatingJavaScriptFromString:jsCallBack];
 }
 
 - (void)setupRightButton:(CDVInvokedUrlCommand*)command
@@ -310,8 +313,12 @@
 
 -(void) rightButtonTapped
 {
+    UIWebView *uiwebview = nil;
+    if ([self.webView isKindOfClass:[UIWebView class]]) {
+        uiwebview = ((UIWebView*)self.webView);
+    }
     NSString * jsCallBack = @"navbar.rightButtonTapped();";
-    [self.webView stringByEvaluatingJavaScriptFromString:jsCallBack];
+    [uiwebview stringByEvaluatingJavaScriptFromString:jsCallBack];
 }
 
 // NOTE: Returned object is owned
@@ -388,7 +395,7 @@
 + (UIBarButtonSystemItem)getUIBarButtonSystemItemForString:(NSString*)imageName
 {
     UIBarButtonSystemItem systemItem = -1;
-
+    
     if([imageName isEqualToString:@"barButton:Action"])        systemItem = UIBarButtonSystemItemAction;
     else if([imageName isEqualToString:@"barButton:Add"])           systemItem = UIBarButtonSystemItemAdd;
     else if([imageName isEqualToString:@"barButton:Bookmarks"])     systemItem = UIBarButtonSystemItemBookmarks;
@@ -413,7 +420,7 @@
     else if([imageName isEqualToString:@"barButton:Stop"])          systemItem = UIBarButtonSystemItemStop;
     else if([imageName isEqualToString:@"barButton:Trash"])         systemItem = UIBarButtonSystemItemTrash;
     else if([imageName isEqualToString:@"barButton:Undo"])          systemItem = UIBarButtonSystemItemUndo;
-
+    
     return systemItem;
 }
 
@@ -440,13 +447,13 @@
 {
     if(!navBarController.navItem.leftBarButtonItem)
         return;
-
+    
     if(![navBarController.navItem.leftBarButtonItem respondsToSelector:@selector(setTintColor:)])
     {
         NSLog(@"setLeftButtonTint unsupported < iOS 5");
         return;
     }
-
+    
     id tint = [command.arguments objectAtIndex:0];
     NSArray *rgba = [tint componentsSeparatedByString:@","];
     UIColor *tintColor = [UIColor colorWithRed:[[rgba objectAtIndex:0] intValue]/255.0f
@@ -478,13 +485,13 @@
 {
     if(!navBarController.navItem.rightBarButtonItem)
         return;
-
+    
     if(![navBarController.navItem.rightBarButtonItem respondsToSelector:@selector(setTintColor:)])
     {
         NSLog(@"setRightButtonTint unsupported < iOS 5");
         return;
     }
-
+    
     id tint = [command.arguments objectAtIndex:0];
     NSArray *rgba = [tint componentsSeparatedByString:@","];
     UIColor *tintColor = [UIColor colorWithRed:[[rgba objectAtIndex:0] intValue]/255.0f
@@ -508,7 +515,7 @@
     NSLog(@"Showing NabBar");
     if (!navBar)
         [self create:nil];
-
+    
     if ([navBar isHidden])
     {
         [navBar setHidden:NO];
@@ -542,7 +549,7 @@
 {
     NSString *logoURL = [command.arguments objectAtIndex:0];
     UIImage *image = nil;
-
+    
     if (logoURL && ![logoURL  isEqual: @""])
     {
         if ([logoURL hasPrefix:@"http://"] || [logoURL hasPrefix:@"https://"])
@@ -552,7 +559,7 @@
         }
         else
             image = [UIImage imageNamed:logoURL];
-
+        
         if (image)
         {
             UIImageView * view = [[UIImageView alloc] initWithImage:image];
