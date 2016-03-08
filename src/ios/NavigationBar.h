@@ -10,8 +10,9 @@
 #import "Cordova/CDV.h"
 
 #import "CDVNavigationBarController.h"
+#import "NavigationBarTableViewCell.h"
 
-@interface NavigationBar : CDVPlugin <CDVNavigationBarDelegate> {
+@interface NavigationBar : CDVPlugin <CDVNavigationBarDelegate, UITableViewDataSource,UITableViewDelegate> {
     UINavigationBar * navBar;
     
     // Represents frame of web view as if started in portrait mode. Coordinates are relative to the superview. With
@@ -21,11 +22,15 @@
     
     CGFloat navBarHeight;
     CGFloat tabBarHeight;
-    
+    UIView *drawerview;
     CDVNavigationBarController * navBarController;
 }
 
 @property (nonatomic, retain) CDVNavigationBarController *navBarController;
+@property (nonatomic, assign) NSInteger *drawervisible; // Drawer
+@property (nonatomic, strong) UITableView * tableView; // Drawer
+@property (nonatomic, retain) NSArray * draweritems; // Drawer
+@property (nonatomic, assign) NSInteger * draweritemscount; // Drawer
 
 - (void)create:(CDVInvokedUrlCommand*)command;
 - (void)setTitle:(CDVInvokedUrlCommand*)command;
@@ -53,6 +58,9 @@
 - (void)setRightButtonTint:(CDVInvokedUrlCommand*)command;
 - (void)setRightButtonTitle:(CDVInvokedUrlCommand*)command;
 
+// New Update for Drawer
+- (void)setupDrawer:(CDVInvokedUrlCommand*)command;
+- (void)DrawerTapped;
 
 @end
 

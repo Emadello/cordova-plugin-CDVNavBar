@@ -4,11 +4,11 @@
     xmlns:rim="http://www.blackberry.com/ns/widgets"
     xmlns:android="http://schemas.android.com/apk/res/android"
     id="cordova-plugin-CDVNavBar"
-    version="2.0.0">
+    version="2.1.0">
     <name>CDVNavBar</name>
     <description>Cordova NavigationBar Plugin</description>
     <license>MIT</license>
-    <keywords>cordova,tabbar,ios</keywords>
+    <keywords>cordova,tabbar,ios,drawer</keywords>
     <repo>https://github.com/Emadello/cordova-plugin-CDVNavBar.git</repo>
     <issue>https://github.com/Emadello/cordova-plugin-CDVNavBar/issues</issue>
 
@@ -26,6 +26,10 @@
 
         <header-file src="src/ios/NavigationBar.h" />
         <source-file src="src/ios/NavigationBar.m" />
+        <header-file src="src/ios/MMTableViewCell.h" />
+        <source-file src="src/ios/MMTableViewCell.m" />
+        <header-file src="src/ios/NavigationBarTableViewCell.h" />
+        <source-file src="src/ios/NavigationBarTableViewCell.m" />
         <header-file src="src/ios/CDVNavigationBarController.h" />
         <source-file src="src/ios/CDVNavigationBarController.m" />
         <source-file src="src/ios/CDVNavigationBar.xib" />

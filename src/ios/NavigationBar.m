@@ -17,13 +17,15 @@
 #ifndef __IPHONE_3_0
 @synthesize webView;
 #endif
-@synthesize navBarController;
+@synthesize navBarController, drawervisible, draweritems, draweritemscount;
 
 - (void) pluginInitialize {
     UIWebView *uiwebview = nil;
     if ([self.webView isKindOfClass:[UIWebView class]]) {
         uiwebview = ((UIWebView*)self.webView);
     }
+    
+    drawervisible = 0;
     // -----------------------------------------------------------------------
     // This code block is the same for both the navigation and tab bar plugin!
     // -----------------------------------------------------------------------
@@ -568,6 +570,264 @@
             [[navBarController navItem] setTitleView:view];
         }
     }
+}
+
+
+// New Update for Drawer
+
+-(void) setupDrawer:(CDVInvokedUrlCommand *)command
+{
+    CGRect webViewBounds = self.webView.bounds;
+    draweritems = [command.arguments objectAtIndex:0];
+    NSString *buttoncolor = [command.arguments objectAtIndex:1];
+    
+    draweritemscount = draweritems.count;
+    
+    drawerview = [[UIView alloc] initWithFrame:CGRectMake(-240, 64, 240, webViewBounds.size.height)];
+    NSLog(@"Drawer Ready");
+    drawerview.backgroundColor = [[UIColor blackColor] colorWithAlphaComponent:0.5f];
+    
+    // Drawing the button of drawer
+    UIButton *drawerButton = [[UIButton alloc] initWithFrame: CGRectMake(0, 0, 24.0f, 18.0f)];
+    UIImage *backImage = [UIImage imageNamed:@"drawer.png"];
+    [drawerButton setBackgroundImage:backImage forState:UIControlStateNormal];
+    [drawerButton setContentMode:UIViewContentModeScaleAspectFit];
+    [navBar addSubview:drawerButton];
+    
+    UIView *overlay = [[UIView alloc] initWithFrame:[drawerButton frame]];
+    UIImageView *maskImageView = [[UIImageView alloc] initWithImage:backImage];
+    [maskImageView setFrame:[overlay bounds]];
+    [[overlay layer] setMask:[maskImageView layer]];
+    
+    if (buttoncolor == (id)[NSNull null] || buttoncolor.length == 0 ) {
+        
+        [overlay setBackgroundColor:[UIColor blackColor]];
+        
+    } else {
+        
+        UIColor *buttoncolorHEX = [self getUIColorObjectFromHexString:buttoncolor alpha:1];
+        [overlay setBackgroundColor:buttoncolorHEX];
+        
+    }
+    
+    
+    [drawerButton addSubview:overlay];
+    overlay.userInteractionEnabled = NO;
+    
+    [drawerButton addTarget:self action:@selector(DrawerTapped) forControlEvents:UIControlEventTouchUpInside];
+    
+    UIBarButtonItem *thenewbutton = [[UIBarButtonItem alloc] initWithCustomView:drawerButton];
+    
+    navBarController.navItem.leftBarButtonItem = thenewbutton;
+    navBarController.leftButton = thenewbutton;
+    
+    _tableView = [[UITableView alloc] initWithFrame:drawerview.bounds style:UITableViewStylePlain];
+    
+    [self.tableView setDelegate:self];
+    [self.tableView setDataSource:self];
+    [self.tableView setOpaque:NO];
+    [self.tableView setBackgroundColor:[UIColor clearColor]];
+    self.tableView.tableFooterView = [[UIView alloc] initWithFrame:CGRectMake(0.0f, 0.0f, 320.0f, 0.0f)];
+    self.tableView.separatorStyle = UITableViewCellSeparatorStyleSingleLine;
+    [self.tableView setSeparatorColor:[UIColor whiteColor]];
+    [drawerview addSubview:self.tableView];
+    
+    [ [ [ self viewController ] view ] addSubview:drawerview];
+}
+
+-(void) DrawerTapped
+{
+    
+    if (drawervisible == 0) {
+        
+        [self showDrawer];
+        
+    } else {
+        [self hideDrawer];
+    }
+    
+}
+
+-(void) showDrawer
+{
+    drawervisible = 1;
+    [UIView animateWithDuration:0.3f animations:^{
+        drawerview.frame = CGRectOffset(drawerview.frame, 240, 0);
+    }];
+    
+}
+
+-(void) hideDrawer
+{
+    drawervisible = 0;
+    [UIView animateWithDuration:0.3f animations:^{
+        drawerview.frame = CGRectOffset(drawerview.frame, -240, 0);
+    }];
+    
+}
+
+#pragma mark - Table view data source
+
+- (NSInteger)numberOfSectionsInTableView:(UITableView *)tableView
+{
+    // Return the number of sections.
+    return 1;
+}
+
+- (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section
+{
+    // Return the number of rows in the section.
+    if (draweritemscount > 0) return draweritemscount;
+    else return 0;
+    
+}
+
+- (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath
+{
+    static NSString *CellIdentifier = @"Cell";
+    
+    UITableViewCell *cell = (UITableViewCell*)[tableView dequeueReusableCellWithIdentifier:CellIdentifier];
+    
+    if (cell == nil) {
+        
+        cell = [[NavigationBarTableViewCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:CellIdentifier];
+        [cell setSelectionStyle:UITableViewCellSelectionStyleBlue];
+        
+    }
+    
+    for (int i = 0; i < [draweritems count]; i++)
+    {
+        if(indexPath.row == i) {
+            
+            NSArray *currentitem = [draweritems objectAtIndex: i];
+            NSString *itemtitle = [currentitem objectAtIndex:0];
+            NSString *itemlogo = [currentitem objectAtIndex:2];
+            NSString *itembadge = [currentitem objectAtIndex:3];
+            
+            [cell.textLabel setText:itemtitle];
+            
+            // Adding item image
+            if (itemlogo == (id)[NSNull null] || itemlogo.length == 0 ) {
+                
+                cell.imageView.image = nil;
+                
+            } else {
+                
+                cell.imageView.image = [UIImage imageNamed:itemlogo];
+                
+            }
+            
+            // Adding item badge
+            if (itembadge == (id)[NSNull null] || itembadge.length == 0 ) {
+                
+                [cell setAccessoryType:UITableViewCellAccessoryNone];
+                
+            } else {
+                
+                UILabel *accesoryBadge = [[UILabel alloc] init];
+                NSString *string = itembadge;
+                accesoryBadge.text = string;
+                accesoryBadge.textColor = [UIColor whiteColor];
+                accesoryBadge.textAlignment = NSTextAlignmentCenter;
+                accesoryBadge.layer.cornerRadius = 2;
+                //accesoryBadge.backgroundColor = [UIColor redColor];
+                accesoryBadge.clipsToBounds = true;
+                [accesoryBadge setFont:[UIFont fontWithName:@"Helvetica" size:10.0]];
+                
+                accesoryBadge.frame = CGRectMake(0, 0, 50, 20);
+                [accesoryBadge sizeToFit];
+                cell.accessoryView = accesoryBadge;
+                
+            }
+            
+        }
+    }
+    
+    return cell;
+}
+
+-(NSString*)tableView:(UITableView *)tableView titleForHeaderInSection:(NSInteger)section{
+    return @"";
+}
+
+-(UIView*)tableView:(UITableView *)tableView viewForHeaderInSection:(NSInteger)section{
+    
+    return nil;
+}
+
+-(CGFloat)tableView:(UITableView *)tableView heightForHeaderInSection:(NSInteger)section{
+    return 0.0;
+}
+
+-(CGFloat)tableView:(UITableView *)tableView heightForRowAtIndexPath:(NSIndexPath *)indexPath{
+    return 55.0;
+}
+
+-(CGFloat)tableView:(UITableView *)tableView heightForFooterInSection:(NSInteger)section{
+    return 0.0;
+}
+
+#pragma mark - Table view delegate
+
+- (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath
+{
+    
+    UIWebView *uiwebview = nil;
+    if ([self.webView isKindOfClass:[UIWebView class]]) {
+        uiwebview = ((UIWebView*)self.webView);
+    }
+    
+    
+    
+    
+    for (int i = 0; i < [draweritems count]; i++)
+    {
+        if(indexPath.row == i) {
+            
+            NSArray *currentitem = [draweritems objectAtIndex: i];
+            NSString *itemurl = [currentitem objectAtIndex:1];
+            
+            NSString * jsCallBack = [NSString stringWithFormat:@"window.location.href='%@'", itemurl];
+            [uiwebview stringByEvaluatingJavaScriptFromString:jsCallBack];
+            [self hideDrawer];
+            
+        }
+    }
+    
+    
+    [tableView selectRowAtIndexPath:indexPath animated:NO scrollPosition:UITableViewScrollPositionNone];
+    [tableView deselectRowAtIndexPath:indexPath animated:YES];
+}
+
+- (UIColor *)getUIColorObjectFromHexString:(NSString *)hexStr alpha:(CGFloat)alpha
+{
+    // Convert hex string to an integer
+    unsigned int hexint = [self intFromHexString:hexStr];
+    
+    // Create color object, specifying alpha as well
+    UIColor *color =
+    [UIColor colorWithRed:((CGFloat) ((hexint & 0xFF0000) >> 16))/255
+                    green:((CGFloat) ((hexint & 0xFF00) >> 8))/255
+                     blue:((CGFloat) (hexint & 0xFF))/255
+                    alpha:alpha];
+    
+    return color;
+}
+
+- (unsigned int)intFromHexString:(NSString *)hexStr
+{
+    unsigned int hexInt = 0;
+    
+    // Create scanner
+    NSScanner *scanner = [NSScanner scannerWithString:hexStr];
+    
+    // Tell scanner to skip the # character
+    [scanner setCharactersToBeSkipped:[NSCharacterSet characterSetWithCharactersInString:@"#"]];
+    
+    // Scan hex value
+    [scanner scanHexInt:&hexInt];
+    
+    return hexInt;
 }
 
 @end

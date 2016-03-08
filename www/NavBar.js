@@ -88,9 +88,18 @@ module.exports = {
         exec(null, null, "NavBar", "setupRightButton", [title, image, thefunction]);
     },
 
-        rightButtonTapped: function() {
-        if(typeof(this.rightButtonCallback) === "function")
-        this.rightButtonCallback()
+    rightButtonTapped: function() {
+    	if(typeof(this.rightButtonCallback) === "function")
+		this.rightButtonCallback()
+    },
+
+    setupDrawer: function(listitems, buttoncolor) {
+    	exec(null, null, "NavBar", "setupDrawer", [listitems, buttoncolor]);
+    },
+
+    DrawerTapped: function() {
+    	if(typeof(this.DrawerCallback) === "function")
+        this.DrawerCallback()
     }
 
 
