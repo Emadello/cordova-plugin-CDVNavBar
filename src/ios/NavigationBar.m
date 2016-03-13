@@ -578,13 +578,14 @@
 
 -(void) setupDrawer:(CDVInvokedUrlCommand *)command
 {
+    
     CGRect webViewBounds = self.webView.bounds;
     draweritems = [command.arguments objectAtIndex:0];
     NSString *buttoncolor = [command.arguments objectAtIndex:1];
     
     draweritemscount = draweritems.count;
     
-    drawerview = [[UIView alloc] initWithFrame:CGRectMake(-240, 64, 240, webViewBounds.size.height)];
+    if (!drawerview) drawerview = [[UIView alloc] initWithFrame:CGRectMake(-240, 64, 240, webViewBounds.size.height)];
     NSLog(@"Drawer Ready");
     drawerview.backgroundColor = [[UIColor blackColor] colorWithAlphaComponent:0.5f];
     
@@ -622,17 +623,19 @@
     navBarController.navItem.leftBarButtonItem = thenewbutton;
     navBarController.leftButton = thenewbutton;
     
-    _tableView = [[UITableView alloc] initWithFrame:drawerview.bounds style:UITableViewStylePlain];
-    
-    [self.tableView setDelegate:self];
-    [self.tableView setDataSource:self];
-    [self.tableView setOpaque:NO];
-    [self.tableView setBackgroundColor:[UIColor clearColor]];
-    self.tableView.tableFooterView = [[UIView alloc] initWithFrame:CGRectMake(0.0f, 0.0f, 320.0f, 0.0f)];
-    self.tableView.separatorStyle = UITableViewCellSeparatorStyleSingleLine;
-    [self.tableView setSeparatorColor:[UIColor whiteColor]];
-    [drawerview addSubview:self.tableView];
-    
+    if (!_tableView) {
+        
+        _tableView = [[UITableView alloc] initWithFrame:drawerview.bounds style:UITableViewStylePlain];
+        [self.tableView setDelegate:self];
+        [self.tableView setDataSource:self];
+        [self.tableView setOpaque:NO];
+        [self.tableView setBackgroundColor:[UIColor clearColor]];
+        self.tableView.tableFooterView = [[UIView alloc] initWithFrame:CGRectMake(0.0f, 0.0f, 320.0f, 0.0f)];
+        self.tableView.separatorStyle = UITableViewCellSeparatorStyleSingleLine;
+        [self.tableView setSeparatorColor:[UIColor whiteColor]];
+        [drawerview addSubview:self.tableView];
+        
+    } else [self.tableView reloadData];
     [ [ [ self viewController ] view ] addSubview:drawerview];
 }
 

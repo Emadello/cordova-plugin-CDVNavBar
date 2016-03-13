@@ -30,7 +30,7 @@
 @property (nonatomic, assign) NSInteger *drawervisible; // Drawer
 @property (nonatomic, strong) UITableView * tableView; // Drawer
 @property (nonatomic, retain) NSArray * draweritems; // Drawer
-@property (nonatomic, assign) NSInteger * draweritemscount; // Drawer
+@property (nonatomic, assign) int draweritemscount; // Drawer
 
 - (void)create:(CDVInvokedUrlCommand*)command;
 - (void)setTitle:(CDVInvokedUrlCommand*)command;
