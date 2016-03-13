@@ -211,7 +211,8 @@
     
     
     [navBarController setDelegate:self];
-    
+    [[navBarController navItem] setLeftBarButtonItem:nil animated:NO];
+    [[navBarController navItem] setRightBarButtonItem:nil animated:NO];
     [[navBarController view] setFrame:CGRectMake(0, 0, originalWebViewFrame.size.width, navBarHeight)];
     [[[self webView] superview] addSubview:[navBarController view]];
     [navBar setHidden:YES];
