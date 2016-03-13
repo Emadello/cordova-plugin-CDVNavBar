@@ -655,6 +655,13 @@
         drawerview.frame = CGRectOffset(drawerview.frame, 240, 0);
     }];
     
+    UIWebView *uiwebview = nil;
+    if ([self.webView isKindOfClass:[UIWebView class]]) {
+        uiwebview = ((UIWebView*)self.webView);
+    }
+    
+    uiwebview.userInteractionEnabled = NO;
+    
 }
 
 -(void) hideDrawer
@@ -663,6 +670,13 @@
     [UIView animateWithDuration:0.3f animations:^{
         drawerview.frame = CGRectOffset(drawerview.frame, -240, 0);
     }];
+    
+    UIWebView *uiwebview = nil;
+    if ([self.webView isKindOfClass:[UIWebView class]]) {
+        uiwebview = ((UIWebView*)self.webView);
+    }
+    
+    uiwebview.userInteractionEnabled = YES;
     
 }
 
