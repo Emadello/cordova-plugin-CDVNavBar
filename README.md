@@ -3,10 +3,6 @@
 
 This plugin adds NavigationBar to your Cordova Applications.
 
-#NOTE
-You should also install CDVTabBar plugin to work properly.
-
-
 ## Installation
 
     cordova plugin add cordova-plugin-cdvnavbar
