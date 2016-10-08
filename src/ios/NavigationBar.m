@@ -20,6 +20,9 @@
 @synthesize navBarController, drawervisible, draweritems, draweritemscount;
 
 - (void) pluginInitialize {
+    
+    [[NSNotificationCenter defaultCenter] addObserver:self  selector:@selector(orientationChanged:)    name:UIDeviceOrientationDidChangeNotification  object:nil];
+    
     UIWebView *uiwebview = nil;
     if ([self.webView isKindOfClass:[UIWebView class]]) {
         uiwebview = ((UIWebView*)self.webView);
@@ -115,38 +118,36 @@
         return;
     
     const bool navBarShown = !navBar.hidden;
-    bool tabBarShown = false;
-    bool tabBarAtBottom = true;
-    
-    UIView *parent = [navBar superview];
-    for(UIView *view in parent.subviews)
-        if([view isMemberOfClass:[UITabBar class]])
-        {
-            tabBarShown = !view.hidden;
-            
-            // Tab bar height is customizable
-            if(tabBarShown)
-            {
-                tabBarHeight = view.bounds.size.height;
-                
-                // Since the navigation bar plugin plays together with the tab bar plugin, and the tab bar can as well
-                // be positioned at the top, here's some magic to find out where it's positioned:
-                tabBarAtBottom = true;
-                if([view respondsToSelector:@selector(tabBarAtBottom)])
-                    tabBarAtBottom = [view performSelector:@selector(tabBarAtBottom)];
-            }
-            
-            break;
-        }
     
     // -----------------------------------------------------------------------------
     // IMPORTANT: Below code is the same in both the navigation and tab bar plugins!
     // -----------------------------------------------------------------------------
     
+    CGRect screenBound = [[UIScreen mainScreen] bounds];
+    CGSize screenSize = screenBound.size;
+    
     CGFloat left = originalWebViewFrame.origin.x;
-    CGFloat right = left + originalWebViewFrame.size.width;
+    CGFloat right = screenSize.width;
     CGFloat top = originalWebViewFrame.origin.y;
-    CGFloat bottom = top + originalWebViewFrame.size.height;
+    CGFloat bottom = screenSize.height;
+    
+    UIInterfaceOrientation orientation = [[UIApplication sharedApplication] statusBarOrientation];
+    switch (orientation)
+    {
+        case UIInterfaceOrientationPortrait:
+        case UIInterfaceOrientationPortraitUpsideDown:
+        // No need to change width/height from original frame
+        break;
+        case UIInterfaceOrientationLandscapeLeft:
+        case UIInterfaceOrientationLandscapeRight:
+        right = originalWebViewFrame.size.height;
+        bottom = originalWebViewFrame.size.width;
+        break;
+        default:
+        NSLog(@"Unknown orientation: %ld", (long)orientation);
+        break;
+    }
+    
     
     if(navBar.hidden == NO) {
         
@@ -155,14 +156,6 @@
     } else {
         top = 0;
         NSLog(@"NAVBAR IS HIDDEN");
-    }
-    
-    if(tabBarShown)
-    {
-        if(tabBarAtBottom)
-            bottom -= tabBarHeight;
-        else
-            top += tabBarHeight;
     }
     
     CGRect webViewFrame = CGRectMake(left, top, right - left, bottom - top);
@@ -175,11 +168,13 @@
     
     if(navBar.hidden == NO)
     {
-        if(tabBarAtBottom)
+        //if(tabBarAtBottom)
             [navBar setFrame:CGRectMake(left, originalWebViewFrame.origin.y, right - left, navBarHeight)];
-        else
-            [navBar setFrame:CGRectMake(left, originalWebViewFrame.origin.y + tabBarHeight - 20.0f, right - left, navBarHeight)];
+        //else
+            //[navBar setFrame:CGRectMake(left, originalWebViewFrame.origin.y + tabBarHeight - 20.0f, right - left, navBarHeight)];
     }
+    
+    NSLog(@"CorrectView NavBar");
 }
 
 -(void) init:(CDVInvokedUrlCommand*)command
@@ -219,6 +214,10 @@
     
     [UIApplication sharedApplication].statusBarStyle = UIStatusBarStyleLightContent;
     
+}
+
+- (void)orientationChanged:(NSNotification *)notification{
+    [self correctWebViewFrame];
 }
 
 
