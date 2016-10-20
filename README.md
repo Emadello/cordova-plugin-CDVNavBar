@@ -23,6 +23,15 @@ navbar.showRightButton();
 navbar.settitle("Tab 1");
 navbar.show();
 ```
+
+### Image instead of title
+```javascript
+navbar.setLogo(‘IMAGE’);
+
+// Image can be a URL to an image starting with http:// or https://
+// Or can be the title of the image added to the xcode project
+```
+
 ### Example Adding Drawer to NavigationBar
 ```javascript
 var draweritems = [];

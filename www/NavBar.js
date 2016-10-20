@@ -57,6 +57,10 @@ module.exports = {
         exec(null, null, "NavBar", "setTitle", [title]);
     },
 
+    setLogo: function(logo) {
+        exec(null, null, "NavBar", "setLogo", [logo]);
+    },
+
     hideLeftButton: function(style, options) {
         exec(null, null, "NavBar", "hideLeftButton", [style, options]);
     },
@@ -91,6 +95,14 @@ module.exports = {
     rightButtonTapped: function() {
     	if(typeof(this.rightButtonCallback) === "function")
 		this.rightButtonCallback()
+    },
+
+    setLeftButtonEnabled: function(enabled) {
+        exec(null, null, "NavBar", "setLeftButtonEnabled", [enabled]);
+    },
+
+    setRightButtonEnabled: function(enabled) {
+        exec(null, null, "NavBar", "setRightButtonEnabled", [enabled]);
     },
 
     setupDrawer: function(listitems, buttoncolor) {
