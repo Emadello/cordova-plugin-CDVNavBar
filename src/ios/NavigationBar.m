@@ -24,8 +24,12 @@
     [[NSNotificationCenter defaultCenter] addObserver:self  selector:@selector(orientationChanged:)    name:UIDeviceOrientationDidChangeNotification  object:nil];
     
     UIWebView *uiwebview = nil;
+    WKWebView *wkwebview = nil;
+    
     if ([self.webView isKindOfClass:[UIWebView class]]) {
         uiwebview = ((UIWebView*)self.webView);
+    } else if ([self.webView isKindOfClass:[WKWebView class]]) {
+        wkwebview = ((WKWebView*)self.webView);
     }
     
     drawervisible = 0;
@@ -37,7 +41,8 @@
     // Cordova seems to initialize plugins on the first call, there is a plugin method init() that has to be called
     // in order to make Cordova call *this* method. If someone forgets the init() call and uses the navigation bar
     // and tab bar plugins together, these values won't be the original web view frame and layout will be wrong.
-    originalWebViewFrame = uiwebview.frame;
+    if (uiwebview) originalWebViewFrame = uiwebview.frame;
+    else originalWebViewFrame = wkwebview.frame;
     UIApplication *app = [UIApplication sharedApplication];
     
     UIInterfaceOrientation orientation = [[UIApplication sharedApplication] statusBarOrientation];
@@ -291,12 +296,17 @@
 -(void) leftButtonTapped
 {
     UIWebView *uiwebview = nil;
+    WKWebView *wkwebview = nil;
+    
     if ([self.webView isKindOfClass:[UIWebView class]]) {
         uiwebview = ((UIWebView*)self.webView);
+    } else if ([self.webView isKindOfClass:[WKWebView class]]) {
+        wkwebview = ((WKWebView*)self.webView);
     }
     
     NSString * jsCallBack = @"navbar.leftButtonTapped();";
     [uiwebview stringByEvaluatingJavaScriptFromString:jsCallBack];
+    [wkwebview evaluateJavaScript:jsCallBack completionHandler:nil];
 }
 
 - (void)setupRightButton:(CDVInvokedUrlCommand*)command
@@ -316,11 +326,17 @@
 -(void) rightButtonTapped
 {
     UIWebView *uiwebview = nil;
+    WKWebView *wkwebview = nil;
+    
     if ([self.webView isKindOfClass:[UIWebView class]]) {
         uiwebview = ((UIWebView*)self.webView);
+    } else if ([self.webView isKindOfClass:[WKWebView class]]) {
+        wkwebview = ((WKWebView*)self.webView);
     }
+    
     NSString * jsCallBack = @"navbar.rightButtonTapped();";
     [uiwebview stringByEvaluatingJavaScriptFromString:jsCallBack];
+    [wkwebview evaluateJavaScript:jsCallBack completionHandler:nil];
 }
 
 // NOTE: Returned object is owned
@@ -659,11 +675,16 @@
     }];
     
     UIWebView *uiwebview = nil;
+    WKWebView *wkwebview = nil;
+    
     if ([self.webView isKindOfClass:[UIWebView class]]) {
         uiwebview = ((UIWebView*)self.webView);
+    } else if ([self.webView isKindOfClass:[WKWebView class]]) {
+        wkwebview = ((WKWebView*)self.webView);
     }
     
-    uiwebview.userInteractionEnabled = NO;
+    if (uiwebview) uiwebview.userInteractionEnabled = NO;
+    else wkwebview.userInteractionEnabled = NO;
     
 }
 
@@ -675,12 +696,16 @@
     }];
     
     UIWebView *uiwebview = nil;
+    WKWebView *wkwebview = nil;
+    
     if ([self.webView isKindOfClass:[UIWebView class]]) {
         uiwebview = ((UIWebView*)self.webView);
+    } else if ([self.webView isKindOfClass:[WKWebView class]]) {
+        wkwebview = ((WKWebView*)self.webView);
     }
     
-    uiwebview.userInteractionEnabled = YES;
-    
+    if (uiwebview) uiwebview.userInteractionEnabled = YES;
+    else wkwebview.userInteractionEnabled = YES;
 }
 
 #pragma mark - Table view data source
@@ -790,8 +815,12 @@
 {
     
     UIWebView *uiwebview = nil;
+    WKWebView *wkwebview = nil;
+    
     if ([self.webView isKindOfClass:[UIWebView class]]) {
         uiwebview = ((UIWebView*)self.webView);
+    } else if ([self.webView isKindOfClass:[WKWebView class]]) {
+        wkwebview = ((WKWebView*)self.webView);
     }
     
     
@@ -806,6 +835,7 @@
             
             NSString * jsCallBack = [NSString stringWithFormat:@"window.location.href='%@'", itemurl];
             [uiwebview stringByEvaluatingJavaScriptFromString:jsCallBack];
+            [wkwebview evaluateJavaScript:jsCallBack completionHandler:nil];
             [self hideDrawer];
             
         }
