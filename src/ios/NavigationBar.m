@@ -19,20 +19,23 @@
 #endif
 @synthesize navBarController, drawervisible, draweritems, draweritemscount;
 
-- (void) pluginInitialize {
-    
-    [[NSNotificationCenter defaultCenter] addObserver:self  selector:@selector(orientationChanged:)    name:UIDeviceOrientationDidChangeNotification  object:nil];
-    
-    UIWebView *uiwebview = nil;
-    WKWebView *wkwebview = nil;
-    
-    if ([self.webView isKindOfClass:[UIWebView class]]) {
-        uiwebview = ((UIWebView*)self.webView);
-    } else if ([self.webView isKindOfClass:[WKWebView class]]) {
-        wkwebview = ((WKWebView*)self.webView);
+- (void)applyNavBarConstraints:(CGFloat)width height:(CGFloat)height
+{
+    if (width == 0 || height == 0) {
+        return;
     }
     
-    drawervisible = 0;
+    NSLayoutConstraint *heightConstraint = [NSLayoutConstraint constraintWithItem:self attribute:NSLayoutAttributeHeight relatedBy:NSLayoutRelationEqual toItem:nil attribute:NSLayoutAttributeNotAnAttribute multiplier:1 constant:height];
+    NSLayoutConstraint *widthConstraint = [NSLayoutConstraint constraintWithItem:self attribute:NSLayoutAttributeWidth relatedBy:NSLayoutRelationEqual toItem:nil attribute:NSLayoutAttributeNotAnAttribute multiplier:1 constant:width];
+    [heightConstraint setActive:TRUE];
+    [widthConstraint setActive:TRUE];
+}
+
+- (void) pluginInitialize {
+    UIWebView *uiwebview = nil;
+    if ([self.webView isKindOfClass:[UIWebView class]]) {
+        uiwebview = ((UIWebView*)self.webView);
+    }
     // -----------------------------------------------------------------------
     // This code block is the same for both the navigation and tab bar plugin!
     // -----------------------------------------------------------------------
@@ -41,8 +44,7 @@
     // Cordova seems to initialize plugins on the first call, there is a plugin method init() that has to be called
     // in order to make Cordova call *this* method. If someone forgets the init() call and uses the navigation bar
     // and tab bar plugins together, these values won't be the original web view frame and layout will be wrong.
-    if (uiwebview) originalWebViewFrame = uiwebview.frame;
-    else originalWebViewFrame = wkwebview.frame;
+    originalWebViewFrame = uiwebview.frame;
     UIApplication *app = [UIApplication sharedApplication];
     
     UIInterfaceOrientation orientation = [[UIApplication sharedApplication] statusBarOrientation];
@@ -54,23 +56,23 @@
         case UIInterfaceOrientationLandscapeLeft:
         case UIInterfaceOrientationLandscapeRight:
         {
-            float statusBarHeight = 0;
+            float statusBarHeight = 20.0f;
             if(!app.statusBarHidden)
                 statusBarHeight = MIN(app.statusBarFrame.size.width, app.statusBarFrame.size.height);
             
             originalWebViewFrame = CGRectMake(originalWebViewFrame.origin.y,
-                                              originalWebViewFrame.origin.x,
+                                              originalWebViewFrame.origin.x + 20.0f,
                                               originalWebViewFrame.size.height + statusBarHeight,
                                               originalWebViewFrame.size.width - statusBarHeight);
             break;
         }
         default:
-            NSLog(@"Unknown orientation: %d", orientation);
+            //NSLog(@"Unknown orientation: %d", orientation);
             break;
     }
     
     //if (isAtLeast8) navBarHeight = 44.0f;
-    navBarHeight = 64.0f;
+    navBarHeight = 44.0f;
     tabBarHeight = 49.0f;
     // -----------------------------------------------------------------------
     
@@ -94,9 +96,9 @@
     
     backButton.titleLabel.textColor = [UIColor whiteColor];
     backButton.titleLabel.font = [UIFont boldSystemFontOfSize:12.0f];
-    backButton.titleLabel.textAlignment = UITextAlignmentCenter;
+    backButton.titleLabel.textAlignment = NSTextAlignmentCenter;
     
-    CGSize textSize = [title sizeWithFont:backButton.titleLabel.font];
+    CGSize textSize = [title sizeWithAttributes:@{NSFontAttributeName: [UIFont boldSystemFontOfSize:12.0f]}];
     
     float buttonWidth = MAX(imgNormal.size.width, textSize.width + fixedMarginLeft + fixedMarginRight);//imgNormal.size.width > (textSize.width + fixedMarginLeft + fixedMarginRight)
     //? imgNormal.size.width : (textSize.width + fixedMarginLeft + fixedMarginRight);
@@ -123,47 +125,75 @@
         return;
     
     const bool navBarShown = !navBar.hidden;
+    bool tabBarShown = false;
+    bool tabBarAtBottom = true;
+    
+    UIView *parent = [navBar superview];
+    for(UIView *view in parent.subviews)
+        if([view isMemberOfClass:[UITabBar class]])
+        {
+            tabBarShown = !view.hidden;
+            
+            // Tab bar height is customizable
+            if(tabBarShown)
+            {
+                tabBarHeight = view.bounds.size.height;
+                
+                // Since the navigation bar plugin plays together with the tab bar plugin, and the tab bar can as well
+                // be positioned at the top, here's some magic to find out where it's positioned:
+                tabBarAtBottom = true;
+                if([view respondsToSelector:@selector(tabBarAtBottom)])
+                    tabBarAtBottom = [view performSelector:@selector(tabBarAtBottom)];
+            }
+            
+            break;
+        }
     
     // -----------------------------------------------------------------------------
     // IMPORTANT: Below code is the same in both the navigation and tab bar plugins!
     // -----------------------------------------------------------------------------
     
-    CGRect screenBound = [[UIScreen mainScreen] bounds];
-    CGSize screenSize = screenBound.size;
+    CGFloat left, right, top, bottom;
     
-    CGFloat left = originalWebViewFrame.origin.x;
-    CGFloat right = screenSize.width;
-    CGFloat top = originalWebViewFrame.origin.y;
-    CGFloat bottom = screenSize.height;
     
-    UIInterfaceOrientation orientation = [[UIApplication sharedApplication] statusBarOrientation];
-    switch (orientation)
-    {
-        case UIInterfaceOrientationPortrait:
-        case UIInterfaceOrientationPortraitUpsideDown:
-        // No need to change width/height from original frame
-        break;
-        case UIInterfaceOrientationLandscapeLeft:
-        case UIInterfaceOrientationLandscapeRight:
-        right = originalWebViewFrame.size.height;
-        bottom = originalWebViewFrame.size.width;
-        break;
-        default:
-        NSLog(@"Unknown orientation: %ld", (long)orientation);
-        break;
+    left = originalWebViewFrame.origin.x;
+    right = left + originalWebViewFrame.size.width;
+    if (@available(iOS 11.0, *)) {
+        top = originalWebViewFrame.origin.y + [[self webView] superview].safeAreaInsets.top;
+        bottom = top + originalWebViewFrame.size.height - [[self webView] superview].safeAreaInsets.top;
+    } else {
+        top = originalWebViewFrame.origin.y;
+        bottom = top + originalWebViewFrame.size.height;
     }
-    
     
     if(navBar.hidden == NO) {
         
         top += navBarHeight;
         NSLog(@"NAVBAR IS SHOWN");
+        
     } else {
+        
         top = 0;
         NSLog(@"NAVBAR IS HIDDEN");
     }
     
-    CGRect webViewFrame = CGRectMake(left, top, right - left, bottom - top);
+    if(tabBarShown)
+    {
+        if(tabBarAtBottom)
+            bottom -= tabBarHeight;
+        else
+            top += tabBarHeight;
+    }
+    
+    CGRect webViewFrame;
+    
+    if (@available(iOS 11.0, *)) {
+        webViewFrame = CGRectMake(left, top, right - left, bottom - top - [[self webView] superview].safeAreaInsets.bottom);
+    } else {
+        webViewFrame = CGRectMake(left, top, right - left, bottom - top);
+    }
+    
+    
     
     [self.webView setFrame:webViewFrame];
     
@@ -173,13 +203,28 @@
     
     if(navBar.hidden == NO)
     {
-        //if(tabBarAtBottom)
-            [navBar setFrame:CGRectMake(left, originalWebViewFrame.origin.y, right - left, navBarHeight)];
-        //else
-            //[navBar setFrame:CGRectMake(left, originalWebViewFrame.origin.y + tabBarHeight - 20.0f, right - left, navBarHeight)];
+        
+        if(tabBarAtBottom)
+            if (@available(iOS 11.0, *)) {
+                [navBar setFrame:CGRectMake(left, originalWebViewFrame.origin.y + [[self webView] superview].safeAreaInsets.top, right - left, navBarHeight)];
+            } else {
+                [navBar setFrame:CGRectMake(left, originalWebViewFrame.origin.y, right - left, navBarHeight)];
+            }
+            else
+                if (@available(iOS 11.0, *)) {
+                    [navBar setFrame:CGRectMake(left, originalWebViewFrame.origin.y + tabBarHeight - 20.0f, right - left, navBarHeight)];
+                } else {
+                    [navBar setFrame:CGRectMake(left, originalWebViewFrame.origin.y + tabBarHeight - 20.0f, right - left, navBarHeight)];
+                }
+        
+        
     }
     
-    NSLog(@"CorrectView NavBar");
+    if (@available(iOS 11.0, *)) {
+        navBar.insetsLayoutMarginsFromSafeArea = true;
+    }
+    
+    
 }
 
 -(void) init:(CDVInvokedUrlCommand*)command
@@ -189,7 +234,7 @@
 
 -(void) create:(CDVInvokedUrlCommand*)command
 {
-    NSLog(@"HRERE");
+    
     if(navBar)
         return;
     
@@ -198,26 +243,26 @@
     
     navBar.barStyle = UIBarStyleBlackTranslucent;
     [navBar setTintColor:[UIColor whiteColor]];
-    [navBar setBackgroundColor:[UIColor colorWithRed:218.0/255.0 green:33.0/255.0 blue:39.0/255.0 alpha:1.0]];
+    [navBar setBackgroundColor:[UIColor colorWithRed:218.0/255.0 green:133.0/255.0 blue:39.0/255.0 alpha:1.0]];
     //[navBar setBackgroundImage:[UIImage imageNamed:@"bg_new.png"] forBarMetrics:UIBarMetricsDefault];
     NSShadow *shadow = [[NSShadow alloc] init];
     shadow.shadowColor = [UIColor colorWithRed:131.0/255.0 green:23.0/255.0 blue:78.0/255.0 alpha:1.0];
     shadow.shadowOffset = CGSizeMake(0, 2);
     shadow.shadowBlurRadius = 5;
     [navBar setTitleTextAttributes: [NSDictionary dictionaryWithObjectsAndKeys:
-                                     [UIColor colorWithRed:245.0/255.0 green:245.0/255.0 blue:245.0/255.0 alpha:1.0], NSForegroundColorAttributeName,
+                                     [UIColor colorWithRed:255.0/255.0 green:255.0/255.0 blue:255.0/255.0 alpha:1.0], NSForegroundColorAttributeName,
                                      //shadow, NSShadowAttributeName,
-                                     [UIFont fontWithName:@"Helvetica" size:18.0], NSFontAttributeName, nil]];
+                                     [UIFont fontWithName:@"Helvetica-Bold" size:16.0], NSFontAttributeName, nil]];
     
     
     [navBarController setDelegate:self];
-    [[navBarController navItem] setLeftBarButtonItem:nil animated:NO];
-    [[navBarController navItem] setRightBarButtonItem:nil animated:NO];
+    //[navBar safeAreaLayoutGuide];
+    
     [[navBarController view] setFrame:CGRectMake(0, 0, originalWebViewFrame.size.width, navBarHeight)];
     [[[self webView] superview] addSubview:[navBarController view]];
     [navBar setHidden:YES];
     
-    [UIApplication sharedApplication].statusBarStyle = UIStatusBarStyleLightContent;
+    [UIApplication sharedApplication].statusBarStyle = UIStatusBarStyleDefault;
     
 }
 
@@ -359,16 +404,13 @@
         {
             
             // New Changes
-            if ((![title  isEqual: @"Back"])) {
-                
-                return [[UIBarButtonItem alloc] initWithTitle:title style:UIBarButtonItemStylePlain target:self action:actionOnSelf ];
+            if (([title  isEqual: @"Back"])) {
                 
                 
-            } else {
                 
                 NSDictionary *attrs = @{ NSFontAttributeName : [UIFont systemFontOfSize:9] };
                 
-                UIButton *backButton = [[UIButton alloc] initWithFrame: CGRectMake(0, 0, 15.0f, 20.0f)];
+                UIButton *backButton = [[UIButton alloc] initWithFrame: CGRectMake(0, 0, 17.0f, 23.0f)];
                 UIImage *backImage = [UIImage imageNamed:@"back2.png"];
                 [backButton setBackgroundImage:backImage forState:UIControlStateNormal];
                 //[backButton setTitle:@"Back" forState:UIControlStateNormal];
@@ -376,13 +418,51 @@
                 //[backButton setBackgroundColor:[UIColor blackColor]];
                 [navBar addSubview:backButton];
                 
+                NSLayoutConstraint * widthConstraint = [backButton.widthAnchor constraintEqualToConstant:17];
+                NSLayoutConstraint * HeightConstraint =[backButton.heightAnchor constraintEqualToConstant:23];
+                [widthConstraint setActive:YES];
+                [HeightConstraint setActive:YES];
+                
                 [backButton addTarget:self action:actionOnSelf forControlEvents:UIControlEventTouchUpInside];
                 UIBarButtonItem *thenewbutton = [[UIBarButtonItem alloc] initWithCustomView:backButton];
                 [thenewbutton setTitleTextAttributes:attrs forState:UIControlStateNormal];
                 return thenewbutton;
                 
                 
-                //return [[UIBarButtonItem alloc] initWithTitle:title style:UIBarButtonItemStylePlain target:self action:actionOnSelf ];
+                
+                
+                
+                
+            } else if (([title  isEqual: @"Music"])) {
+                
+                NSDictionary *attrs = @{ NSFontAttributeName : [UIFont systemFontOfSize:9] };
+                
+                UIButton *backButton = [[UIButton alloc] initWithFrame: CGRectMake(0, 0, 25.0f, 25.0f)];
+                UIImage *backImage = [UIImage imageNamed:@"music.png"];
+                [backButton setBackgroundImage:backImage forState:UIControlStateNormal];
+                //[backButton setTitle:@"Back" forState:UIControlStateNormal];
+                [backButton setContentMode:UIViewContentModeScaleAspectFit];
+                //[backButton setBackgroundColor:[UIColor blackColor]];
+                [navBar addSubview:backButton];
+                
+                
+                
+                NSLayoutConstraint * widthConstraint = [backButton.widthAnchor constraintEqualToConstant:25];
+                NSLayoutConstraint * HeightConstraint =[backButton.heightAnchor constraintEqualToConstant:25];
+                [widthConstraint setActive:YES];
+                [HeightConstraint setActive:YES];
+                
+                [backButton addTarget:self action:actionOnSelf forControlEvents:UIControlEventTouchUpInside];
+                
+                
+                UIBarButtonItem *thenewbutton = [[UIBarButtonItem alloc] initWithCustomView:backButton];
+                [thenewbutton setTitleTextAttributes:attrs forState:UIControlStateNormal];
+                return thenewbutton;
+                
+                
+            } else {
+                
+                return [[UIBarButtonItem alloc] initWithTitle:title style:UIBarButtonItemStylePlain target:self action:actionOnSelf ];
                 
             }
             //
