@@ -24,6 +24,7 @@
     CGFloat tabBarHeight;
     UIView *drawerview;
     CDVNavigationBarController * navBarController;
+    UIDeviceOrientation currentDeviceOrientation;
 }
 
 @property (nonatomic, retain) CDVNavigationBarController *navBarController;

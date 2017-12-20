@@ -45,31 +45,12 @@
     // in order to make Cordova call *this* method. If someone forgets the init() call and uses the navigation bar
     // and tab bar plugins together, these values won't be the original web view frame and layout will be wrong.
     originalWebViewFrame = uiwebview.frame;
-    UIApplication *app = [UIApplication sharedApplication];
-    
-    UIInterfaceOrientation orientation = [[UIApplication sharedApplication] statusBarOrientation];
-    switch (orientation)
-    {
-        case UIInterfaceOrientationPortrait:
-        case UIInterfaceOrientationPortraitUpsideDown:
-            break;
-        case UIInterfaceOrientationLandscapeLeft:
-        case UIInterfaceOrientationLandscapeRight:
-        {
-            float statusBarHeight = 20.0f;
-            if(!app.statusBarHidden)
-                statusBarHeight = MIN(app.statusBarFrame.size.width, app.statusBarFrame.size.height);
-            
-            originalWebViewFrame = CGRectMake(originalWebViewFrame.origin.y,
-                                              originalWebViewFrame.origin.x + 20.0f,
-                                              originalWebViewFrame.size.height + statusBarHeight,
-                                              originalWebViewFrame.size.width - statusBarHeight);
-            break;
-        }
-        default:
-            //NSLog(@"Unknown orientation: %d", orientation);
-            break;
-    }
+        
+    [[UIDevice currentDevice] beginGeneratingDeviceOrientationNotifications];
+    [[NSNotificationCenter defaultCenter]
+     addObserver:self selector:@selector(orientationChanged:)
+     name:UIDeviceOrientationDidChangeNotification
+     object:[UIDevice currentDevice]];
     
     //if (isAtLeast8) navBarHeight = 44.0f;
     navBarHeight = 44.0f;
@@ -78,6 +59,29 @@
     
 }
 
+- (void) orientationChanged:(NSNotification *)note
+{
+    UIDevice * device = note.object;
+    switch(device.orientation)
+    {
+        case UIDeviceOrientationPortrait:
+        NSLog(@"NavBar Orientation Changed to portrait");
+        [self correctWebViewFrame];
+        break;
+        
+        case UIDeviceOrientationPortraitUpsideDown:
+        NSLog(@"NavBar Orientation Changed to upsidedown");
+        [self correctWebViewFrame];
+        break;
+        
+        default:
+        NSLog(@"NavBar Orientation Changed to landscape");
+        float statusBarHeight = 20.0f;
+        [self correctWebViewFrame];
+        break;
+    };
+        
+}
 
 // NOTE: Returned object is owned
 -(UIBarButtonItem*)backgroundButtonFromImage:(NSString*)imageName title:(NSString*)title fixedMarginLeft:(float)fixedMarginLeft fixedMarginRight:(float)fixedMarginRight target:(id)target action:(SEL)action
@@ -121,8 +125,11 @@
 
 -(void)correctWebViewFrame
 {
-    if(!navBar)
-        return;
+    //if(!navBar)
+        //return;
+    currentDeviceOrientation = [[UIDevice currentDevice] orientation];
+    BOOL isLandscape = UIDeviceOrientationIsLandscape(currentDeviceOrientation);
+    BOOL isPortrait = UIDeviceOrientationIsPortrait(currentDeviceOrientation);
     
     const bool navBarShown = !navBar.hidden;
     bool tabBarShown = false;
@@ -154,16 +161,17 @@
     // -----------------------------------------------------------------------------
     
     CGFloat left, right, top, bottom;
+
+    left = [UIScreen mainScreen].bounds.origin.x;
+    right = left + [UIScreen mainScreen].bounds.size.width;
+
     
-    
-    left = originalWebViewFrame.origin.x;
-    right = left + originalWebViewFrame.size.width;
     if (@available(iOS 11.0, *)) {
-        top = originalWebViewFrame.origin.y + [[self webView] superview].safeAreaInsets.top;
-        bottom = top + originalWebViewFrame.size.height - [[self webView] superview].safeAreaInsets.top;
+        top = [UIScreen mainScreen].bounds.origin.y + [[self webView] superview].safeAreaInsets.top;
+        if (isPortrait) bottom = top + [UIScreen mainScreen].bounds.size.height - [[self webView] superview].safeAreaInsets.top;
+        else bottom = top + [UIScreen mainScreen].bounds.size.height;
     } else {
-        top = originalWebViewFrame.origin.y;
-        bottom = top + originalWebViewFrame.size.height;
+        top = [UIScreen mainScreen].bounds.origin.y;
     }
     
     if(navBar.hidden == NO) {
@@ -193,8 +201,6 @@
         webViewFrame = CGRectMake(left, top, right - left, bottom - top);
     }
     
-    
-    
     [self.webView setFrame:webViewFrame];
     
     // -----------------------------------------------------------------------------
@@ -204,19 +210,26 @@
     if(navBar.hidden == NO)
     {
         
-        if(tabBarAtBottom)
+        if(tabBarAtBottom) {
+            
             if (@available(iOS 11.0, *)) {
-                [navBar setFrame:CGRectMake(left, originalWebViewFrame.origin.y + [[self webView] superview].safeAreaInsets.top, right - left, navBarHeight)];
+                if (isPortrait) [navBar setFrame:CGRectMake(left, originalWebViewFrame.origin.y + [[self webView] superview].safeAreaInsets.top, right - left, navBarHeight)];
+                else [navBar setFrame:CGRectMake(left, originalWebViewFrame.origin.x, right - left, navBarHeight)];
             } else {
-                [navBar setFrame:CGRectMake(left, originalWebViewFrame.origin.y, right - left, navBarHeight)];
+                if (isPortrait) [navBar setFrame:CGRectMake(left, originalWebViewFrame.origin.y, right - left, navBarHeight)];
+                else [navBar setFrame:CGRectMake(left, originalWebViewFrame.origin.y, right - left, navBarHeight)];
             }
-            else
+            
+        } else {
+            
                 if (@available(iOS 11.0, *)) {
-                    [navBar setFrame:CGRectMake(left, originalWebViewFrame.origin.y + tabBarHeight - 20.0f, right - left, navBarHeight)];
+                    if (isPortrait) [navBar setFrame:CGRectMake(0, originalWebViewFrame.origin.y + tabBarHeight - 20.0f, right - left, navBarHeight)];
+                    else [navBar setFrame:CGRectMake(0, originalWebViewFrame.origin.y + tabBarHeight + 20.0f, right - left, navBarHeight)];
                 } else {
-                    [navBar setFrame:CGRectMake(left, originalWebViewFrame.origin.y + tabBarHeight - 20.0f, right - left, navBarHeight)];
+                    if (isPortrait) [navBar setFrame:CGRectMake(0, originalWebViewFrame.origin.y + tabBarHeight - 20.0f, right - left, navBarHeight)];
+                    else [navBar setFrame:CGRectMake(0, originalWebViewFrame.origin.y + tabBarHeight + 20.0f, right - left, navBarHeight)];
                 }
-        
+        }
         
     }
     
@@ -264,10 +277,6 @@
     
     [UIApplication sharedApplication].statusBarStyle = UIStatusBarStyleDefault;
     
-}
-
-- (void)orientationChanged:(NSNotification *)notification{
-    [self correctWebViewFrame];
 }
 
 
