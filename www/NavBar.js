@@ -56,8 +56,6 @@ module.exports = {
     settitle: function(title) {
         exec(null, null, "NavBar", "setTitle", [title]);
     },
-    
-    ,
     setBGhex: function(hex) {
         exec(null, null, "NavBar", "setBGhex", [hex]);
     },
@@ -67,11 +65,9 @@ module.exports = {
     setButtonshex: function(hex) {
         exec(null, null, "NavBar", "setButtonshex", [hex]);
     },
-
     setLogo: function(logo) {
         exec(null, null, "NavBar", "setLogo", [logo]);
     },
-
     hideLeftButton: function(style, options) {
         exec(null, null, "NavBar", "hideLeftButton", [style, options]);
     },
