@@ -21,6 +21,9 @@ navbar.hideRightButton();
 navbar.setupRightButton("", 'barButton:Refresh', null);
 navbar.showRightButton();
 navbar.settitle("Tab 1");
+navbar.setBGhex("#FF0000"); // NavBar BG Color
+navbar.setTitlehex("#000000"); // Title Color
+navbar.setButtonshex("#CCCCCC"); // Buttons Color
 navbar.show();
 ```
 

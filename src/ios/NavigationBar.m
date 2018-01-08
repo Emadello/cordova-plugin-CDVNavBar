@@ -297,6 +297,65 @@
     [navBarController navItem].titleView = NULL;
 }
 
+//////////////
+// BG COLOR //
+//////////////
+
+-(void) setBGhex:(CDVInvokedUrlCommand*)command
+{
+    if(!navBar)
+        return;
+    
+    NSLog(@"Set BG hex color");
+    NSString *bghex = [command.arguments objectAtIndex:0];
+    UIColor *BGcolor = [self colorWithHexString:bghex alpha:1];
+    [navBar setBarTintColor:BGcolor];
+    
+}
+
+/////////////////
+// Title COLOR //
+/////////////////
+
+-(void) setTitlehex:(CDVInvokedUrlCommand*)command
+{
+    if(!navBar)
+        return;
+    
+    NSLog(@"Set Title hex color");
+    NSString *titlehex = [command.arguments objectAtIndex:0];
+    UIColor *Titlecolor = [self colorWithHexString:titlehex alpha:1];
+    [navBar setTitleTextAttributes:
+     @{NSForegroundColorAttributeName:Titlecolor}];
+    
+}
+
+///////////////////
+// Buttons COLOR //
+///////////////////
+
+-(void) setButtonshex:(CDVInvokedUrlCommand*)command
+{
+    if(!navBar)
+        return;
+    
+    NSLog(@"Set Buttons hex color");
+    NSString *colorhex = [command.arguments objectAtIndex:0];
+    UIColor *buttonscolor = [self colorWithHexString:colorhex alpha:1];
+    [navBar setTintColor:buttonscolor];
+    
+}
+
+- (UIColor *)colorWithHexString:(NSString *)str_HEX  alpha:(CGFloat)alpha_range{
+    
+    unsigned rgbValue = 0;
+    NSScanner *scanner = [NSScanner scannerWithString:str_HEX];
+    [scanner setScanLocation:1]; // bypass '#' character
+    [scanner scanHexInt:&rgbValue];
+    return [UIColor colorWithRed:((rgbValue & 0xFF0000) >> 16)/255.0 green:((rgbValue & 0xFF00) >> 8)/255.0 blue:(rgbValue & 0xFF)/255.0 alpha:alpha_range];
+    
+}
+
 /////////////
 // Buttons //
 /////////////
