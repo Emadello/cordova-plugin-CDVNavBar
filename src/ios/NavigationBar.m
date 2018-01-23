@@ -128,8 +128,8 @@
     //if(!navBar)
         //return;
     currentDeviceOrientation = [[UIDevice currentDevice] orientation];
-    BOOL isLandscape = UIDeviceOrientationIsLandscape(currentDeviceOrientation);
-    BOOL isPortrait = UIDeviceOrientationIsPortrait(currentDeviceOrientation);
+    BOOL isLandscape = [UIApplication sharedApplication].statusBarOrientation == (UIInterfaceOrientationLandscapeLeft | UIInterfaceOrientationLandscapeRight);
+    BOOL isPortrait = [UIApplication sharedApplication].statusBarOrientation == UIInterfaceOrientationPortrait;
     
     const bool navBarShown = !navBar.hidden;
     bool tabBarShown = false;
