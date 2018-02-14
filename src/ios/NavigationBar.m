@@ -126,7 +126,7 @@
 -(void)correctWebViewFrame
 {
     //if(!navBar)
-        //return;
+    //return;
     currentDeviceOrientation = [[UIDevice currentDevice] orientation];
     BOOL isLandscape = [UIApplication sharedApplication].statusBarOrientation == (UIInterfaceOrientationLandscapeLeft | UIInterfaceOrientationLandscapeRight);
     BOOL isPortrait = [UIApplication sharedApplication].statusBarOrientation == UIInterfaceOrientationPortrait;
@@ -137,41 +137,43 @@
     
     UIView *parent = [navBar superview];
     for(UIView *view in parent.subviews)
-        if([view isMemberOfClass:[UITabBar class]])
+    if([view isMemberOfClass:[UITabBar class]])
+    {
+        tabBarShown = !view.hidden;
+        
+        // Tab bar height is customizable
+        if(tabBarShown)
         {
-            tabBarShown = !view.hidden;
+            tabBarHeight = view.bounds.size.height;
             
-            // Tab bar height is customizable
-            if(tabBarShown)
-            {
-                tabBarHeight = view.bounds.size.height;
-                
-                // Since the navigation bar plugin plays together with the tab bar plugin, and the tab bar can as well
-                // be positioned at the top, here's some magic to find out where it's positioned:
-                tabBarAtBottom = true;
-                if([view respondsToSelector:@selector(tabBarAtBottom)])
-                    tabBarAtBottom = [view performSelector:@selector(tabBarAtBottom)];
-            }
-            
-            break;
+            // Since the navigation bar plugin plays together with the tab bar plugin, and the tab bar can as well
+            // be positioned at the top, here's some magic to find out where it's positioned:
+            tabBarAtBottom = true;
+            if([view respondsToSelector:@selector(tabBarAtBottom)])
+            tabBarAtBottom = [view performSelector:@selector(tabBarAtBottom)];
         }
+        
+        break;
+    }
     
     // -----------------------------------------------------------------------------
     // IMPORTANT: Below code is the same in both the navigation and tab bar plugins!
     // -----------------------------------------------------------------------------
     
     CGFloat left, right, top, bottom;
-
+    
     left = [UIScreen mainScreen].bounds.origin.x;
     right = left + [UIScreen mainScreen].bounds.size.width;
-
+    
     
     if (@available(iOS 11.0, *)) {
         top = [UIScreen mainScreen].bounds.origin.y + [[self webView] superview].safeAreaInsets.top;
         if (isPortrait) bottom = top + [UIScreen mainScreen].bounds.size.height - [[self webView] superview].safeAreaInsets.top;
         else bottom = top + [UIScreen mainScreen].bounds.size.height;
     } else {
-        top = [UIScreen mainScreen].bounds.origin.y;
+        
+        top = [UIScreen mainScreen].bounds.origin.y + 20.0f;
+        bottom = top + [UIScreen mainScreen].bounds.size.height - 20.0f;
     }
     
     if(navBar.hidden == NO) {
@@ -188,9 +190,9 @@
     if(tabBarShown)
     {
         if(tabBarAtBottom)
-            bottom -= tabBarHeight;
+        bottom -= tabBarHeight;
         else
-            top += tabBarHeight;
+        top += tabBarHeight;
     }
     
     CGRect webViewFrame;
@@ -215,20 +217,22 @@
             if (@available(iOS 11.0, *)) {
                 if (isPortrait) [navBar setFrame:CGRectMake(left, originalWebViewFrame.origin.y + [[self webView] superview].safeAreaInsets.top, right - left, navBarHeight)];
                 else [navBar setFrame:CGRectMake(left, originalWebViewFrame.origin.x, right - left, navBarHeight)];
+                NSLog(@"iOS 11");
             } else {
-                if (isPortrait) [navBar setFrame:CGRectMake(left, originalWebViewFrame.origin.y, right - left, navBarHeight)];
+                if (isPortrait) [navBar setFrame:CGRectMake(left, originalWebViewFrame.origin.y + 20.0f, right - left, navBarHeight)];
                 else [navBar setFrame:CGRectMake(left, originalWebViewFrame.origin.y, right - left, navBarHeight)];
+                NSLog(@"not iOS 11");
             }
             
         } else {
             
-                if (@available(iOS 11.0, *)) {
-                    if (isPortrait) [navBar setFrame:CGRectMake(0, originalWebViewFrame.origin.y + tabBarHeight - 20.0f, right - left, navBarHeight)];
-                    else [navBar setFrame:CGRectMake(0, originalWebViewFrame.origin.y + tabBarHeight + 20.0f, right - left, navBarHeight)];
-                } else {
-                    if (isPortrait) [navBar setFrame:CGRectMake(0, originalWebViewFrame.origin.y + tabBarHeight - 20.0f, right - left, navBarHeight)];
-                    else [navBar setFrame:CGRectMake(0, originalWebViewFrame.origin.y + tabBarHeight + 20.0f, right - left, navBarHeight)];
-                }
+            if (@available(iOS 11.0, *)) {
+                if (isPortrait) [navBar setFrame:CGRectMake(0, originalWebViewFrame.origin.y + tabBarHeight - 20.0f, right - left, navBarHeight)];
+                else [navBar setFrame:CGRectMake(0, originalWebViewFrame.origin.y + tabBarHeight + 20.0f, right - left, navBarHeight)];
+            } else {
+                if (isPortrait) [navBar setFrame:CGRectMake(0, originalWebViewFrame.origin.y + tabBarHeight - 20.0f, right - left, navBarHeight)];
+                else [navBar setFrame:CGRectMake(0, originalWebViewFrame.origin.y + tabBarHeight + 20.0f, right - left, navBarHeight)];
+            }
         }
         
     }
@@ -236,8 +240,6 @@
     if (@available(iOS 11.0, *)) {
         navBar.insetsLayoutMarginsFromSafeArea = true;
     }
-    
-    
 }
 
 -(void) init:(CDVInvokedUrlCommand*)command
