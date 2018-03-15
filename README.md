@@ -22,7 +22,8 @@ navbar.setupRightButton("", 'barButton:Refresh', null);
 navbar.showRightButton();
 navbar.settitle("Tab 1");
 navbar.setBGhex("#FF0000"); // NavBar BG Color
-navbar.setTitlehex("#000000"); // Title Color
+navbar.setTitlehex("#000000"); // Title Color (will be deprecated, use setTitleAttr instead)
+navbar.setTitleAttr("#FFFFFF","Helvetica-Bold","16.0"); // If you want a custom font, you need to add it to xcode
 navbar.setButtonshex("#CCCCCC"); // Buttons Color
 navbar.show();
 ```
