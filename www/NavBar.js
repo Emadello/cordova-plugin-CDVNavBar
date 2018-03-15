@@ -62,6 +62,9 @@ module.exports = {
     setTitlehex: function(hex) {
         exec(null, null, "NavBar", "setTitlehex", [hex]);
     },
+    setTitleAttr: function(hex,font,size) {
+    exec(null, null, "NavBar", "setTitleAttr", [hex, font, size]);
+    },
     setButtonshex: function(hex) {
         exec(null, null, "NavBar", "setButtonshex", [hex]);
     },

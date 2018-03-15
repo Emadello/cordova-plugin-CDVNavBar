@@ -37,6 +37,7 @@
 - (void)setTitle:(CDVInvokedUrlCommand*)command;
 - (void)setBGhex:(CDVInvokedUrlCommand*)command;
 - (void)setTitlehex:(CDVInvokedUrlCommand*)command;
+- (void)setTitleAttr:(CDVInvokedUrlCommand*)command;
 - (void)setButtonshex:(CDVInvokedUrlCommand*)command;
 - (void)setLogo:(CDVInvokedUrlCommand*)command;
 - (void)show:(CDVInvokedUrlCommand*)command;

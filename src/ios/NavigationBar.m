@@ -331,6 +331,34 @@
      @{NSForegroundColorAttributeName:Titlecolor}];
     
 }
+    
+//////////////////////
+// Title Attributes //
+//////////////////////
+
+-(void) setTitleAttr:(CDVInvokedUrlCommand*)command
+{
+    if(!navBar)
+    return;
+    
+    
+    NSString *titlehex = [command.arguments objectAtIndex:0];
+    NSString *titlefont = [command.arguments objectAtIndex:1];
+    CGFloat titlesize = [[command.arguments objectAtIndex:2] floatValue];
+    
+    if (!titlefont) titlefont = @"Helvetica-Bold";
+    
+    NSLog(@"Set Title Attributes Color: %@", titlehex);
+    NSLog(@"Set Title Attributes Font: %@", titlefont);
+    NSLog(@"Set Title Attributes Size: %f", titlesize);
+    
+    UIColor *Titlecolor = [self colorWithHexString:titlehex alpha:1];
+    
+    [navBar setTitleTextAttributes: [NSDictionary dictionaryWithObjectsAndKeys:
+                                     Titlecolor, NSForegroundColorAttributeName,
+                                     [UIFont fontWithName:titlefont size:titlesize], NSFontAttributeName, nil]];
+    
+}
 
 ///////////////////
 // Buttons COLOR //
