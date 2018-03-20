@@ -709,6 +709,7 @@
 -(void) show:(CDVInvokedUrlCommand*)command
 {
     NSLog(@"Showing NabBar");
+    [self correctWebViewFrame];
     if (!navBar)
         [self create:nil];
     
