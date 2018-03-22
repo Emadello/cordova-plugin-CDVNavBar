@@ -176,7 +176,7 @@
         bottom = top + [UIScreen mainScreen].bounds.size.height - 20.0f;
     }
     
-    if(navBar.hidden == NO) {
+    if(navBar && navBar.hidden == NO) {
         
         top += navBarHeight;
         NSLog(@"NAVBAR IS SHOWN");
