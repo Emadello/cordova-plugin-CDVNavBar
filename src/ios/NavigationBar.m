@@ -55,6 +55,7 @@
     //if (isAtLeast8) navBarHeight = 44.0f;
     navBarHeight = 44.0f;
     tabBarHeight = 49.0f;
+    navbartrans = FALSE;
     // -----------------------------------------------------------------------
     
 }
@@ -165,7 +166,7 @@
         left = [UIScreen mainScreen].bounds.origin.x;
         right = left + [UIScreen mainScreen].bounds.size.width;
         
-        if (!navBar) {
+        if (!navBar || navbartrans) {
             
             top = 0;
             bottom = top + [UIScreen mainScreen].bounds.size.height;
@@ -185,7 +186,7 @@
         }
         
         
-        if(navBar && navBar.hidden == NO) {
+        if(navBar && navBar.hidden == NO && !navbartrans) {
             
             top += navBarHeight;
             NSLog(@"NAVBAR IS SHOWN");
@@ -319,13 +320,31 @@
         
         NSLog(@"Set BG hex color");
         NSString *bghex = [command.arguments objectAtIndex:0];
-        UIColor *BGcolor = [self colorWithHexString:bghex alpha:1];
-        [navBar setBarTintColor:BGcolor];
         
-        UIView *statusBar = [[[UIApplication sharedApplication] valueForKey:@"statusBarWindow"] valueForKey:@"statusBar"];
-        
-        if ([statusBar respondsToSelector:@selector(setBackgroundColor:)]) {
-            statusBar.tintColor = BGcolor;
+        if ([bghex  isEqual: @"transparent"]) {
+            
+            [navBar setBackgroundImage:[UIImage new] forBarMetrics:UIBarMetricsDefault];
+            navBar.shadowImage = [UIImage new];
+            navBar.translucent = YES;
+            self.navBarController.view.backgroundColor = [UIColor clearColor];
+            navBar.backgroundColor = [UIColor clearColor];
+            navbartrans = TRUE;
+            [self correctWebViewFrame];
+            navBar.layer.zPosition = 99;
+            
+        } else {
+            
+            navbartrans = FALSE;
+            [self correctWebViewFrame];
+            UIColor *BGcolor = [self colorWithHexString:bghex alpha:1];
+            [navBar setBarTintColor:BGcolor];
+            
+            UIView *statusBar = [[[UIApplication sharedApplication] valueForKey:@"statusBarWindow"] valueForKey:@"statusBar"];
+            
+            if ([statusBar respondsToSelector:@selector(setBackgroundColor:)]) {
+                statusBar.tintColor = BGcolor;
+            }
+            
         }
         
     }

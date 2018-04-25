@@ -22,6 +22,7 @@
     
     CGFloat navBarHeight;
     CGFloat tabBarHeight;
+    _Bool navbartrans;
     UIView *drawerview;
     CDVNavigationBarController * navBarController;
     UIDeviceOrientation currentDeviceOrientation;
