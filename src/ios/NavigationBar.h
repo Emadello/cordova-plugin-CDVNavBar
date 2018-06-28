@@ -23,17 +23,19 @@
     CGFloat navBarHeight;
     CGFloat tabBarHeight;
     _Bool navbartrans;
+    _Bool rightbuttonshown;
+    _Bool reshowrightbutton;
     UIView *drawerview;
     CDVNavigationBarController * navBarController;
     UIDeviceOrientation currentDeviceOrientation;
 }
-
-@property (nonatomic, retain) CDVNavigationBarController *navBarController;
-@property (nonatomic, assign) NSInteger *drawervisible; // Drawer
-@property (nonatomic, strong) UITableView * tableView; // Drawer
-@property (nonatomic, retain) NSArray * draweritems; // Drawer
-@property (nonatomic, assign) int draweritemscount; // Drawer
-
+    
+    @property (nonatomic, retain) CDVNavigationBarController *navBarController;
+    @property (nonatomic, assign) NSInteger *drawervisible; // Drawer
+    @property (nonatomic, strong) UITableView * tableView; // Drawer
+    @property (nonatomic, retain) NSArray * draweritems; // Drawer
+    @property (nonatomic, assign) int draweritemscount; // Drawer
+    
 - (void)create:(CDVInvokedUrlCommand*)command;
 - (void)setTitle:(CDVInvokedUrlCommand*)command;
 - (void)setBGhex:(CDVInvokedUrlCommand*)command;
@@ -48,28 +50,28 @@
 - (void)setupRightButton:(CDVInvokedUrlCommand*)command;
 - (void)leftButtonTapped;
 - (void)rightButtonTapped;
-
-
+    
+    
 - (void)showRightButton:(CDVInvokedUrlCommand*)command;
 - (void)showLeftButton:(CDVInvokedUrlCommand*)command;
-
+    
 - (void)hideRightButton:(CDVInvokedUrlCommand*)command;
 - (void)hideLeftButton:(CDVInvokedUrlCommand*)command;
-
+    
 - (void)setLeftButtonEnabled:(CDVInvokedUrlCommand*)command;
 - (void)setLeftButtonTint:(CDVInvokedUrlCommand*)command;
 - (void)setLeftButtonTitle:(CDVInvokedUrlCommand*)command;
-
+    
 - (void)setRightButtonEnabled:(CDVInvokedUrlCommand*)command;
 - (void)setRightButtonTint:(CDVInvokedUrlCommand*)command;
 - (void)setRightButtonTitle:(CDVInvokedUrlCommand*)command;
-
-// New Update for Drawer
+    
+    // New Update for Drawer
 - (void)setupDrawer:(CDVInvokedUrlCommand*)command;
 - (void)DrawerTapped;
-
-@end
+    
+    @end
 
 @interface UITabBar (NavBarCompat)
-@property (nonatomic) bool tabBarAtBottom;
-@end
+    @property (nonatomic) bool tabBarAtBottom;
+    @end

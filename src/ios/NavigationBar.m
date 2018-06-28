@@ -56,6 +56,8 @@
     navBarHeight = 44.0f;
     tabBarHeight = 49.0f;
     navbartrans = FALSE;
+    rightbuttonshown = FALSE;
+    reshowrightbutton = FALSE;
     // -----------------------------------------------------------------------
     
 }
@@ -277,7 +279,7 @@
         [navBar setTitleTextAttributes: [NSDictionary dictionaryWithObjectsAndKeys:
                                          [UIColor colorWithRed:255.0/255.0 green:255.0/255.0 blue:255.0/255.0 alpha:1.0], NSForegroundColorAttributeName,
                                          //shadow, NSShadowAttributeName,
-                                         [UIFont fontWithName:@"DroidArabicKufi-Bold" size:16.0], NSFontAttributeName, nil]];
+                                         [UIFont fontWithName:@"Vodafone Rg Bold" size:16.0], NSFontAttributeName, nil]];
         
         
         [navBarController setDelegate:self];
@@ -321,6 +323,8 @@
         NSLog(@"Set BG hex color");
         NSString *bghex = [command.arguments objectAtIndex:0];
         
+        UIView *statusBar = [[[UIApplication sharedApplication] valueForKey:@"statusBarWindow"] valueForKey:@"statusBar"];
+        
         if ([bghex  isEqual: @"transparent"]) {
             
             [navBar setBackgroundImage:[UIImage new] forBarMetrics:UIBarMetricsDefault];
@@ -332,20 +336,36 @@
             [self correctWebViewFrame];
             navBar.layer.zPosition = 99;
             
+            [[UIApplication sharedApplication] setStatusBarStyle:UIStatusBarStyleDefault];
+            if ([statusBar respondsToSelector:@selector(setBackgroundColor:)]) {
+                statusBar.tintColor = [UIColor clearColor];
+                statusBar.backgroundColor = [UIColor clearColor];
+            }
+            
         } else {
             
-            navbartrans = FALSE;
+            if (([bghex isEqual: @"#008fb3"])) {
+                navbartrans = TRUE;
+                navBar.shadowImage = [UIImage new];
+            } else navbartrans = FALSE;
+            
             [self correctWebViewFrame];
             UIColor *BGcolor = [self colorWithHexString:bghex alpha:1];
             [navBar setBarTintColor:BGcolor];
+            [[UINavigationBar appearance] setBarStyle:UIBarStyleDefault];
+            [navBar setTranslucent:NO];
             
-            UIView *statusBar = [[[UIApplication sharedApplication] valueForKey:@"statusBarWindow"] valueForKey:@"statusBar"];
+            
+            [[UIApplication sharedApplication] setStatusBarStyle:UIStatusBarStyleLightContent];
             
             if ([statusBar respondsToSelector:@selector(setBackgroundColor:)]) {
                 statusBar.tintColor = BGcolor;
+                statusBar.backgroundColor = BGcolor;
             }
             
         }
+        
+        
         
     }
     
@@ -380,7 +400,20 @@
         NSString *titlefont = [command.arguments objectAtIndex:1];
         CGFloat titlesize = [[command.arguments objectAtIndex:2] floatValue];
         
-        if (!titlefont) titlefont = @"Helvetica-Bold";
+        if (!titlefont) titlefont = @"VodafoneRg-Bold";
+        
+        NSArray *families = [[UIFont familyNames] sortedArrayUsingSelector:@selector(localizedCaseInsensitiveCompare:)];
+        NSMutableString *fonts = [NSMutableString string];
+        for (int i = 0; i < [families count]; i++) {
+            [fonts appendString:[NSString stringWithFormat:@"\n%@:\n", families[i]]];
+            NSArray *names = [UIFont fontNamesForFamilyName:families[i]];
+            for (int j = 0; j < [names count]; j++) {
+                [fonts appendString:[NSString stringWithFormat:@"\t%@\n", names[j]]];
+            }
+        }
+        NSLog(@"%@", fonts);
+        
+        
         
         NSLog(@"Set Title Attributes Color: %@", titlehex);
         NSLog(@"Set Title Attributes Font: %@", titlefont);
@@ -437,8 +470,10 @@
     {
         //const NSDictionary *options = [command.arguments objectAtIndex:0];
         //bool animated = [[options objectForKey:@"animated"] boolValue];
-        
+        rightbuttonshown = FALSE;
+        reshowrightbutton = FALSE;
         [[navBarController navItem] setRightBarButtonItem:nil animated:YES];
+        
     }
     
 - (void)showLeftButton:(CDVInvokedUrlCommand*)command
@@ -453,7 +488,7 @@
     {
         //const NSDictionary *options = [command.arguments objectAtIndex:0];
         //bool animated = [[options objectForKey:@"animated"] boolValue];
-        
+        rightbuttonshown = TRUE;
         [[navBarController navItem] setRightBarButtonItem:[navBarController rightButton] animated:YES];
     }
     
@@ -546,7 +581,7 @@
                     if (@available(iOS 11.0, *)) {
                         
                         backButton = [[UIButton alloc] initWithFrame: CGRectMake(0, 0, 47.0f, 23.0f)];
-                        backImage = [UIImage imageNamed:@"back.png"];
+                        backImage = [UIImage imageNamed:@"back2.png"];
                         [backButton setImage:backImage forState:UIControlStateNormal];
                         [backButton setContentMode:UIViewContentModeLeft];
                         backButton.imageEdgeInsets = UIEdgeInsetsMake(12.0f, 0, 11.0f, 47.0f);
@@ -555,7 +590,7 @@
                     } else {
                         
                         backButton = [[UIButton alloc] initWithFrame: CGRectMake(0, 0, 17.0f, 23.0f)];
-                        backImage = [UIImage imageNamed:@"back.png"];
+                        backImage = [UIImage imageNamed:@"back2.png"];
                         [backButton setBackgroundImage:backImage forState:UIControlStateNormal];
                         [backButton setContentMode:UIViewContentModeScaleAspectFit];
                         [navBar addSubview:backButton];
@@ -608,10 +643,16 @@
         {
             UIBarButtonSystemItem systemItem = [NavigationBar getUIBarButtonSystemItemForString:imageName];
             
+            UIImage *image = [UIImage imageNamed:imageName];
+            UIButton *button = [UIButton buttonWithType:UIButtonTypeCustom];
+            button.bounds = CGRectMake( 0, 0, image.size.width, image.size.height );
+            [button setImage:image forState:UIControlStateNormal];
+            [button addTarget:self action:actionOnSelf forControlEvents:UIControlEventTouchUpInside];
+            
             if(systemItem != -1)
             return [[UIBarButtonItem alloc] initWithBarButtonSystemItem:systemItem target:self action:actionOnSelf];
             else
-            return [[UIBarButtonItem alloc] initWithImage:[UIImage imageNamed:imageName] style:UIBarButtonItemStylePlain target:self action:actionOnSelf];
+            return [[UIBarButtonItem alloc] initWithCustomView:button];
         }
         else
         {
@@ -817,43 +858,50 @@
         
         draweritemscount = draweritems.count;
         
-        if (!drawerview) drawerview = [[UIView alloc] initWithFrame:CGRectMake(-240, 64, 240, webViewBounds.size.height)];
-        NSLog(@"Drawer Ready");
-        drawerview.backgroundColor = [[UIColor blackColor] colorWithAlphaComponent:0.5f];
-        
-        // Drawing the button of drawer
-        UIButton *drawerButton = [[UIButton alloc] initWithFrame: CGRectMake(0, 0, 24.0f, 18.0f)];
-        UIImage *backImage = [UIImage imageNamed:@"drawer.png"];
-        [drawerButton setBackgroundImage:backImage forState:UIControlStateNormal];
-        [drawerButton setContentMode:UIViewContentModeScaleAspectFit];
-        [navBar addSubview:drawerButton];
-        
-        UIView *overlay = [[UIView alloc] initWithFrame:[drawerButton frame]];
-        UIImageView *maskImageView = [[UIImageView alloc] initWithImage:backImage];
-        [maskImageView setFrame:[overlay bounds]];
-        [[overlay layer] setMask:[maskImageView layer]];
-        
-        if (buttoncolor == (id)[NSNull null] || buttoncolor.length == 0 ) {
+        if (!drawerview) {
             
-            [overlay setBackgroundColor:[UIColor blackColor]];
+            if (@available(iOS 11.0, *)) {
+                
+                if (navbartrans) drawerview = [[UIView alloc] initWithFrame:CGRectMake(-webViewBounds.size.width, originalWebViewFrame.origin.y + [[self webView] superview].safeAreaInsets.top + navBarHeight, webViewBounds.size.width, webViewBounds.size.height)];
+                else drawerview = [[UIView alloc] initWithFrame:CGRectMake(-webViewBounds.size.width, originalWebViewFrame.origin.y + [[self webView] superview].safeAreaInsets.top, webViewBounds.size.width, webViewBounds.size.height)];
+                
+            } else {
+                
+                if (navbartrans) drawerview = [[UIView alloc] initWithFrame:CGRectMake(-webViewBounds.size.width, originalWebViewFrame.origin.y + 20.0f + navBarHeight, webViewBounds.size.width, webViewBounds.size.height)];
+                else drawerview = [[UIView alloc] initWithFrame:CGRectMake(-webViewBounds.size.width, originalWebViewFrame.origin.y + 20.0f, webViewBounds.size.width, webViewBounds.size.height)];
+                
+            }
             
-        } else {
             
-            UIColor *buttoncolorHEX = [self getUIColorObjectFromHexString:buttoncolor alpha:1];
-            [overlay setBackgroundColor:buttoncolorHEX];
+            //drawerview = [[UIView alloc] initWithFrame:CGRectMake(-webViewBounds.size.width, 64, webViewBounds.size.width, webViewBounds.size.height)];
+            NSLog(@"Drawer Ready");
+            
+            // Drawer background
+            if (!UIAccessibilityIsReduceTransparencyEnabled()) {
+                drawerview.backgroundColor = [UIColor clearColor];
+                
+                UIBlurEffect *blurEffect = [UIBlurEffect effectWithStyle:UIBlurEffectStyleDark];
+                UIVisualEffectView *blurEffectView = [[UIVisualEffectView alloc] initWithEffect:blurEffect];
+                //always fill the view
+                blurEffectView.frame = self.webView.bounds;
+                blurEffectView.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
+                
+                [drawerview addSubview:blurEffectView]; //if you have more UIViews, use an insertSubview API to place it where needed
+                
+            } else {
+                drawerview.backgroundColor = [UIColor blackColor];
+            }
+            
+            UIImageView *myImage = [[UIImageView alloc] initWithFrame:CGRectMake(drawerview.bounds.size.width - 140.0f, drawerview.bounds.size.height - 117.0f, 120.0f, 34.0f)];
+            myImage.image = [UIImage imageNamed:@"vf.png"];
+            [drawerview addSubview:myImage];
             
         }
         
+        [self DrawerIconDefault];
         
-        [drawerButton addSubview:overlay];
-        overlay.userInteractionEnabled = NO;
         
-        [drawerButton addTarget:self action:@selector(DrawerTapped) forControlEvents:UIControlEventTouchUpInside];
         
-        UIBarButtonItem *thenewbutton = [[UIBarButtonItem alloc] initWithCustomView:drawerButton];
-        
-        navBarController.navItem.leftBarButtonItem = thenewbutton;
-        navBarController.leftButton = thenewbutton;
         
         if (!_tableView) {
             
@@ -864,23 +912,70 @@
             [self.tableView setBackgroundColor:[UIColor clearColor]];
             self.tableView.tableFooterView = [[UIView alloc] initWithFrame:CGRectMake(0.0f, 0.0f, 320.0f, 0.0f)];
             self.tableView.separatorStyle = UITableViewCellSeparatorStyleSingleLine;
-            [self.tableView setSeparatorColor:[UIColor whiteColor]];
+            [self.tableView setSeparatorColor:[UIColor clearColor]];
+            
+            //[self.tableView setTableFooterView:myImage];
+            
             [drawerview addSubview:self.tableView];
             
         } else [self.tableView reloadData];
         [ [ [ self viewController ] view ] addSubview:drawerview];
     }
     
+-(void) DrawerIconDefault {
+    
+    // Drawing the default button of drawer
+    UIButton *drawerButton = [[UIButton alloc] initWithFrame: CGRectMake(0, 0, 24.0f, 18.0f)];
+    UIImage *backImage = [UIImage imageNamed:@"icon-menu.png"];
+    [drawerButton setBackgroundImage:backImage forState:UIControlStateNormal];
+    [drawerButton setContentMode:UIViewContentModeScaleAspectFit];
+    [navBar addSubview:drawerButton];
+    
+    UIView *overlay = [[UIView alloc] initWithFrame:[drawerButton frame]];
+    
+    [drawerButton addSubview:overlay];
+    overlay.userInteractionEnabled = NO;
+    
+    [drawerButton addTarget:self action:@selector(DrawerTapped) forControlEvents:UIControlEventTouchUpInside];
+    
+    UIBarButtonItem *thenewbutton = [[UIBarButtonItem alloc] initWithCustomView:drawerButton];
+    
+    [[navBarController navItem] setLeftBarButtonItem:thenewbutton animated:YES];
+    //navBarController.navItem.leftBarButtonItem = thenewbutton;
+    //navBarController.leftButton = thenewbutton;
+    
+}
+    
+-(void) DrawerIconClose {
+    
+    // Drawing the close button of drawer
+    UIButton *drawerButton = [[UIButton alloc] initWithFrame: CGRectMake(0, 0, 24.0f, 18.0f)];
+    UIImage *backImage = [UIImage imageNamed:@"drawerclose.png"];
+    [drawerButton setBackgroundImage:backImage forState:UIControlStateNormal];
+    [drawerButton setContentMode:UIViewContentModeScaleAspectFit];
+    [navBar addSubview:drawerButton];
+    
+    UIView *overlay = [[UIView alloc] initWithFrame:[drawerButton frame]];
+    
+    [drawerButton addSubview:overlay];
+    overlay.userInteractionEnabled = NO;
+    
+    [drawerButton addTarget:self action:@selector(DrawerTapped) forControlEvents:UIControlEventTouchUpInside];
+    
+    UIBarButtonItem *thenewbutton = [[UIBarButtonItem alloc] initWithCustomView:drawerButton];
+    
+    [[navBarController navItem] setLeftBarButtonItem:thenewbutton animated:YES];
+    //navBarController.navItem.leftBarButtonItem = thenewbutton;
+    //navBarController.leftButton = thenewbutton;
+    
+}
+    
 -(void) DrawerTapped
     {
         
-        if (drawervisible == 0) {
-            
-            [self showDrawer];
-            
-        } else {
-            [self hideDrawer];
-        }
+        if (drawervisible == 0) [self showDrawer];
+        else [self hideDrawer];
+        
         
     }
     
@@ -888,8 +983,10 @@
     {
         drawervisible = 1;
         [UIView animateWithDuration:0.3f animations:^{
-            drawerview.frame = CGRectOffset(drawerview.frame, 240, 0);
+            drawerview.frame = CGRectOffset(drawerview.frame, self.webView.bounds.size.width, 0);
         }];
+        
+        [self DrawerIconClose];
         
         UIWebView *uiwebview = nil;
         WKWebView *wkwebview = nil;
@@ -903,14 +1000,21 @@
         if (uiwebview) uiwebview.userInteractionEnabled = NO;
         else wkwebview.userInteractionEnabled = NO;
         
+        if (rightbuttonshown) {
+            [[navBarController navItem] setRightBarButtonItem:nil animated:YES];
+            reshowrightbutton = TRUE;
+        }
+        
     }
     
 -(void) hideDrawer
     {
         drawervisible = 0;
         [UIView animateWithDuration:0.3f animations:^{
-            drawerview.frame = CGRectOffset(drawerview.frame, -240, 0);
+            drawerview.frame = CGRectOffset(drawerview.frame, -self.webView.bounds.size.width, 0);
         }];
+        
+        [self DrawerIconDefault];
         
         UIWebView *uiwebview = nil;
         WKWebView *wkwebview = nil;
@@ -923,6 +1027,8 @@
         
         if (uiwebview) uiwebview.userInteractionEnabled = YES;
         else wkwebview.userInteractionEnabled = YES;
+        
+        if (reshowrightbutton) [[navBarController navItem] setRightBarButtonItem:[navBarController rightButton] animated:YES];
     }
     
 #pragma mark - Table view data source
@@ -946,17 +1052,20 @@
         static NSString *CellIdentifier = @"Cell";
         
         UITableViewCell *cell = (UITableViewCell*)[tableView dequeueReusableCellWithIdentifier:CellIdentifier];
+        cell.backgroundColor = [UIColor clearColor];
         
         if (cell == nil) {
             
             cell = [[NavigationBarTableViewCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:CellIdentifier];
-            [cell setSelectionStyle:UITableViewCellSelectionStyleBlue];
+            [cell setSelectionStyle:UITableViewCellSelectionStyleDefault];
             
         }
         
         for (int i = 0; i < [draweritems count]; i++)
         {
             if(indexPath.row == i) {
+                
+                [cell.textLabel setFont:[UIFont fontWithName:@"VodafoneRg-Bold" size:20.0]];
                 
                 NSArray *currentitem = [draweritems objectAtIndex: i];
                 NSString *itemtitle = [currentitem objectAtIndex:0];
@@ -991,7 +1100,7 @@
                     accesoryBadge.layer.cornerRadius = 2;
                     //accesoryBadge.backgroundColor = [UIColor redColor];
                     accesoryBadge.clipsToBounds = true;
-                    [accesoryBadge setFont:[UIFont fontWithName:@"Helvetica" size:10.0]];
+                    [accesoryBadge setFont:[UIFont fontWithName:@"VodafoneRg-Bold" size:14.0]];
                     
                     accesoryBadge.frame = CGRectMake(0, 0, 50, 20);
                     [accesoryBadge sizeToFit];
@@ -1050,7 +1159,7 @@
                 NSArray *currentitem = [draweritems objectAtIndex: i];
                 NSString *itemurl = [currentitem objectAtIndex:1];
                 
-                NSString * jsCallBack = [NSString stringWithFormat:@"window.location.href='%@'", itemurl];
+                NSString * jsCallBack = [NSString stringWithFormat:@"gofade('%@');", itemurl];
                 [uiwebview stringByEvaluatingJavaScriptFromString:jsCallBack];
                 [wkwebview evaluateJavaScript:jsCallBack completionHandler:nil];
                 [self hideDrawer];
