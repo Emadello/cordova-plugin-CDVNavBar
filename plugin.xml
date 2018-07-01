@@ -4,7 +4,7 @@
     xmlns:rim="http://www.blackberry.com/ns/widgets"
     xmlns:android="http://schemas.android.com/apk/res/android"
     id="cordova-plugin-CDVNavBar"
-    version="2.4.8">
+    version="2.5.0">
     <name>CDVNavBar</name>
     <description>Cordova NavigationBar Plugin</description>
     <license>MIT</license>

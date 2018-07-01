@@ -1,6 +1,6 @@
 {
   "name": "cordova-plugin-cdvnavbar",
-  "version": "2.4.8",
+  "version": "2.5.0",
   "description": "Add Native NavigationBar to your Cordova Applications with Drawer",
   "cordova": {
     "id": "cordova-plugin-CDVNavBar",
